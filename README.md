@@ -109,6 +109,7 @@ These commands require the `@css/root` admin flag
 | ------------- | ------------- |
 | kz_*  | timer_startzone & timer_endzone  |
 | surf_* | s1_start & map_end  |
+| bhop_* | map_start & map_end  |
 
 * If the map uses different trigger targetnames or does not have triggers at all (most bhop and deathrun maps dont) you will have to add them into the `.json` files
 
