@@ -117,18 +117,6 @@ namespace SharpTimer
             }
         }
 
-        static string StringAfterPrefix(string input, string prefix)
-        {
-            int prefixIndex = input.IndexOf(prefix);
-            if (prefixIndex != -1)
-            {
-                int startIndex = prefixIndex + prefix.Length;
-                string result = input.Substring(startIndex);
-                return result;
-            }
-            return string.Empty;
-        }
-
         string ParseColorToSymbol(string input)
         {
             Dictionary<string, string> colorNameSymbolMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -252,7 +240,7 @@ namespace SharpTimer
         public void DrawLaserBetween(Vector startPos, Vector endPos, string _color = "")
         {
             string beamColor = "";
-            if(beamColorOverride == true)
+            if (beamColorOverride == true)
             {
                 beamColor = _color;
             }
@@ -394,6 +382,15 @@ namespace SharpTimer
             return new QAngle(0, 0, 0);
         }
 
+        public static double Distance(Vector vector1, Vector vector2)
+        {
+            double dx = vector2.X - vector1.X;
+            double dy = vector2.Y - vector1.Y;
+            double dz = vector2.Z - vector1.Z;
+
+            return Math.Sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
         public Dictionary<string, PlayerRecord> GetSortedRecords(int bonusX = 0)
         {
             string mapRecordsPath = Path.Combine(playerRecordsPath, bonusX == 0 ? $"{currentMapName}.json" : $"{currentMapName}_bonus{bonusX}.json");
@@ -429,6 +426,64 @@ namespace SharpTimer
                 });
 
             return sortedRecords;
+        }
+
+        public (string, string, string) GetMapRecordSteamID(int bonusX = 0, int top10 = 0)
+        {
+            string mapRecordsPath = Path.Combine(playerRecordsPath, bonusX == 0 ? $"{currentMapName}.json" : $"{currentMapName}_bonus{bonusX}.json");
+
+            Dictionary<string, PlayerRecord> records;
+
+            try
+            {
+                using (JsonDocument jsonDocument = LoadJson(mapRecordsPath))
+                {
+                    if (jsonDocument != null)
+                    {
+                        records = JsonSerializer.Deserialize<Dictionary<string, PlayerRecord>>(jsonDocument.RootElement.GetRawText()) ?? new Dictionary<string, PlayerRecord>();
+                    }
+                    else
+                    {
+                        records = new Dictionary<string, PlayerRecord>();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SharpTimerError($"Error in GetSortedRecords: {ex.Message}");
+                records = new Dictionary<string, PlayerRecord>();
+            }
+
+            string steamId64 = "null";
+            string playerName = "null";
+            string timerTicks = "null";
+
+            if (top10 != 0 && top10 <= records.Count)
+            {
+                var sortedRecords = records.OrderBy(x => x.Value.TimerTicks).ToList();
+                var record = sortedRecords[top10 - 1];
+                steamId64 = record.Key;
+                playerName = record.Value.PlayerName;
+                timerTicks = FormatTime(record.Value.TimerTicks);
+            }
+            else
+            {
+                var minTimerTicksRecord = records.OrderBy(x => x.Value.TimerTicks).FirstOrDefault();
+                if (minTimerTicksRecord.Key != null)
+                {
+                    steamId64 = minTimerTicksRecord.Key;
+                    playerName = minTimerTicksRecord.Value.PlayerName;
+                    timerTicks = FormatTime(minTimerTicksRecord.Value.TimerTicks);
+                }
+                else
+                {
+                    steamId64 = "null";
+                    playerName = "null";
+                    timerTicks = "null";
+                }
+            }
+
+            return (steamId64, playerName, timerTicks);
         }
 
         private async Task<(int? Tier, string? Type)> FindMapInfoFromHTTP(string url)
@@ -529,6 +584,8 @@ namespace SharpTimer
                 stageTriggers.Clear();
                 stageTriggerAngs.Clear();
                 stageTriggerPoses.Clear();
+
+                _ = CheckTablesAsync();
             });
         }
 
@@ -555,10 +612,12 @@ namespace SharpTimer
 
             currentMapTier = null; //making sure previous map tier and type are wiped
             currentMapType = null;
+            currentMapOverrideDisableTelehop = new string[0]; //making sure previous map overrides are reset
+            currentMapOverrideMaxSpeedLimit = new string[0];
+            currentMapOverrideStageRequirement = false;
+            currentMapOverrideTriggerPushFix = false;
 
             _ = GetMapInfo();
-
-            if (triggerPushFixEnabled == true) FindTriggerPushData();
 
             primaryChatColor = ParseColorToSymbol(primaryHUDcolor);
 
@@ -612,21 +671,90 @@ namespace SharpTimer
                             }
                         }
 
-                        if (!string.IsNullOrEmpty(mapInfo.OverrideDisableTelehop))
+                        if (mapInfo.OverrideDisableTelehop != null && mapInfo.OverrideDisableTelehop.Any())
                         {
                             try
                             {
-                                currentMapOverrideDisableTelehop = bool.Parse(mapInfo.OverrideDisableTelehop);
                                 SharpTimerConPrint($"Overriding Telehop...");
+                                currentMapOverrideDisableTelehop = mapInfo.OverrideDisableTelehop
+                                    .Split(',')
+                                    .Select(color => color.Trim())
+                                    .ToArray();
+
+                                foreach (var trigger in currentMapOverrideDisableTelehop)
+                                {
+                                    SharpTimerConPrint($"OverrideDisableTelehop for trigger: {trigger}");
+                                }
+
                             }
-                            catch (FormatException)
+                            catch (Exception ex)
                             {
-                                Console.WriteLine("Invalid boolean string format for OverrideDisableTelehop");
+                                SharpTimerError($"Error parsing OverrideDisableTelehop array: {ex.Message}");
                             }
                         }
                         else
                         {
-                            currentMapOverrideDisableTelehop = false;
+                            currentMapOverrideDisableTelehop = new string[0];
+                        }
+
+                        if (mapInfo.OverrideMaxSpeedLimit != null && mapInfo.OverrideMaxSpeedLimit.Any())
+                        {
+                            try
+                            {
+                                SharpTimerConPrint($"Overriding MaxSpeedLimit...");
+                                currentMapOverrideMaxSpeedLimit = mapInfo.OverrideMaxSpeedLimit
+                                    .Split(',')
+                                    .Select(color => color.Trim())
+                                    .ToArray();
+
+                                foreach (var trigger in currentMapOverrideMaxSpeedLimit)
+                                {
+                                    SharpTimerConPrint($"OverrideMaxSpeedLimit for trigger: {trigger}");
+                                }
+
+                            }
+                            catch (Exception ex)
+                            {
+                                SharpTimerError($"Error parsing OverrideMaxSpeedLimit array: {ex.Message}");
+                            }
+                        }
+                        else
+                        {
+                            currentMapOverrideMaxSpeedLimit = new string[0];
+                        }
+
+                        if (!string.IsNullOrEmpty(mapInfo.OverrideStageRequirement))
+                        {
+                            try
+                            {
+                                currentMapOverrideStageRequirement = bool.Parse(mapInfo.OverrideStageRequirement);
+                                SharpTimerConPrint($"Overriding StageRequirement...");
+                            }
+                            catch (FormatException)
+                            {
+                                SharpTimerError("Invalid boolean string format for OverrideStageRequirement");
+                            }
+                        }
+                        else
+                        {
+                            currentMapOverrideStageRequirement = false;
+                        }
+
+                        if (!string.IsNullOrEmpty(mapInfo.OverrideTriggerPushFix))
+                        {
+                            try
+                            {
+                                currentMapOverrideTriggerPushFix = bool.Parse(mapInfo.OverrideTriggerPushFix);
+                                SharpTimerConPrint($"Overriding TriggerPushFix...");
+                            }
+                            catch (FormatException)
+                            {
+                                SharpTimerError("Invalid boolean string format for OverrideTriggerPushFix");
+                            }
+                        }
+                        else
+                        {
+                            currentMapOverrideTriggerPushFix = false;
                         }
                     }
                     else
@@ -683,6 +811,8 @@ namespace SharpTimer
                 DrawWireframe3D(startRight, startLeft, startBeamColor);
                 DrawWireframe3D(endRight, endLeft, endBeamColor);
             }
+
+            if (triggerPushFixEnabled == true && currentMapOverrideTriggerPushFix == false) FindTriggerPushData();
         }
 
         private JsonDocument LoadJson(string path)

@@ -6,6 +6,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 
 namespace SharpTimer
 {
+    // Cache for map ents
     public class EntityCache
     {
         public List<CBaseTrigger> Triggers { get; private set; }
@@ -30,6 +31,7 @@ namespace SharpTimer
         }
     }
 
+    // MapData JSON
     public class MapInfo
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -57,38 +59,63 @@ namespace SharpTimer
         public string? OverrideDisableTelehop { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? MapTier { get; set; }
+        public string? OverrideMaxSpeedLimit { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? OverrideStageRequirement { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? OverrideTriggerPushFix { get; set; }
     }
 
     public class PlayerTimerInfo
     {
+        //timer
         public bool IsTimerRunning { get; set; }
         public bool IsTimerBlocked { get; set; }
         public int TimerTicks { get; set; }
         public bool IsBonusTimerRunning { get; set; }
         public int BonusTimerTicks { get; set; }
         public int BonusStage { get; set; }
+        
+        //replay
+        public bool IsReplaying { get; set; }
+        public bool IsRecordingReplay { get; set; }
+
+        //hud
+        public string? ReplayHUDString { get; set; }
         public string? RankHUDString { get; set; }
         public bool IsRankPbCached { get; set; }
+        public bool IsSpecTargetCached { get; set; }
         public string? PreSpeed { get; set; }
+        public string? PB { get; set; }
+        
+        //logic
         public int? TicksInAir { get; set; }
         public int CheckpointIndex { get; set; }
-        public bool Azerty { get; set; }
-        public bool HideTimerHud { get; set; }
-        public bool HideKeys { get; set; }
-        public bool SoundsEnabled { get; set; }
-        public int TimesConnected { get; set; }
-        public int TicksSinceLastCmd { get; set; }
         public Dictionary<int, int>? StageTimes { get; set; }
         public Dictionary<int, string>? StageVelos { get; set; }
         public int CurrentMapStage { get; set; }
         public int CurrentMapCheckpoint { get; set; }
         public CCSPlayer_MovementServices? MovementService { get; set; }
 
+        //player settings/stats
+        public bool Azerty { get; set; }
+        public bool HideTimerHud { get; set; }
+        public bool HideKeys { get; set; }
+        public bool SoundsEnabled { get; set; }
+        public int TimesConnected { get; set; }
+        public int TicksSinceLastCmd { get; set; }
+
         //super special stuff for testers
         public bool IsTester { get; set; }
         public string? TesterSparkleGif { get; set; }
         public string? TesterPausedGif { get; set; }
+
+        //vip stuff 
+        public bool IsVip { get; set; }
+        public string? VipReplayGif { get; set; }
+        public string? VipPausedGif { get; set; }
 
         //admin stuff
         public bool IsNoclipEnabled { get; set; }
@@ -101,12 +128,38 @@ namespace SharpTimer
         public string? RespawnPos { get; set; }
     }
 
+    //Replay stuff
+    public class PlayerReplays
+    {
+        public int CurrentPlaybackFrame { get; set; }
+        public int BonusX { get; set; }
+        public List<ReplayFrames> replayFrames { get; set; } = new List<ReplayFrames>();
+
+        public class ReplayFrames
+        {
+            public string PositionString { get; set; }
+            public string RotationString { get; set; }
+            public string SpeedString { get; set; }
+            public PlayerButtons? Buttons { get; set; }
+            public uint Flags { get; set; }
+            public MoveType_t MoveType { get; set; }
+        }
+    }
+
+    public class IndexedReplayFrames
+    {
+        public int Index { get; set; }
+        public PlayerReplays.ReplayFrames Frame { get; set; }
+    }
+
+    // PlayerRecords for JSON
     public class PlayerRecord
     {
         public string? PlayerName { get; set; }
         public int TimerTicks { get; set; }
     }
 
+    // KZ checkpoints
     public class PlayerCheckpoint
     {
         public string? PositionString { get; set; }
@@ -114,12 +167,14 @@ namespace SharpTimer
         public string? SpeedString { get; set; }
     }
 
+    // Stage times and velos
     public class PlayerStageData
     {
         public Dictionary<int, int>? StageTimes { get; set; }
         public Dictionary<int, string>? StageVelos { get; set; }
     }
 
+    // Trigger push
     public class TriggerPushData
     {
         public float PushSpeed { get; set; }
