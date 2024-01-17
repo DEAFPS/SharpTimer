@@ -139,8 +139,6 @@ namespace SharpTimer
         public static string silver2Icon = "<img src='https://files.catbox.moe/r8hytb.png' class=''>";
         public static string silver1Icon = "<img src='https://files.catbox.moe/w4y4in.png' class=''>";
 
-        public bool fromSaveLoc = false;
-
 
         public struct WeaponSpeedStats
         {
