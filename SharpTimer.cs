@@ -55,6 +55,8 @@ namespace SharpTimer
                     playerTimers[player.Slot].CurrentMapStage = 0;
                     playerTimers[player.Slot].CurrentMapCheckpoint = 0;
                     playerTimers[player.Slot].IsRecordingReplay = false;
+                    playerTimers[player.Slot].SaveLocPos = null;
+                    playerTimers[player.Slot].SaveLocAng = null;
 
                     _ = IsPlayerATester(player.SteamID.ToString(), player.Slot);
 
@@ -355,13 +357,8 @@ namespace SharpTimer
                         string triggerName = caller.Entity.Name.ToString();
                         if (!currentMapOverrideDisableTelehop.Contains(triggerName))
                         {
-                            SharpTimerDebug($"Resetting speed for player {player.PlayerName}");
                             Action<CCSPlayerController?, float, bool> adjustVelocity = use2DSpeed ? AdjustPlayerVelocity2D : AdjustPlayerVelocity;
                             adjustVelocity(player, 0, false);
-                        }
-                        else
-                        {
-                            SharpTimerDebug($"Player {player.PlayerName} went through Overritten teleport");
                         }
                     }
 

@@ -525,7 +525,7 @@ namespace SharpTimer
         
         public async Task GetReplayVIPGif(string steamId, int playerSlot)
         {
-            SharpTimerDebug($"Trying to get replay VIP Gif");
+            Server.NextFrame(() => SharpTimerDebug($"Trying to get replay VIP Gif"));
             try
             {
                 using (var connection = await OpenDatabaseConnectionAsync())
@@ -544,12 +544,12 @@ namespace SharpTimer
                             bool isVip = row.GetBoolean("IsVip");
                             if (isVip)
                             {
-                                SharpTimerDebug($"Replay is VIP setting gif...");
+                                Server.NextFrame(() => SharpTimerDebug($"Replay is VIP setting gif..."));
                                 playerTimers[playerSlot].VipReplayGif = row.GetString("BigGifID");
                             }
                             else
                             {
-                                SharpTimerDebug($"Replay is not VIP...");
+                                Server.NextFrame(() => SharpTimerDebug($"Replay is not VIP..."));
                                 playerTimers[playerSlot].VipReplayGif = "x";
                             }
 
@@ -558,7 +558,7 @@ namespace SharpTimer
                         else
                         {
                             await row.CloseAsync();
-                            SharpTimerDebug($"Replay is not VIP... goofy");
+                            Server.NextFrame(() => SharpTimerDebug($"Replay is not VIP... goofy"));
                             playerTimers[playerSlot].VipReplayGif = "x";
                         }
                     }
@@ -574,7 +574,7 @@ namespace SharpTimer
 
         public async Task<(string, string, string)> GetMapRecordSteamIDFromDatabase(int bonusX = 0, int top10 = 0)
         {
-            SharpTimerDebug($"Trying to get replay VIP Gif");
+            SharpTimerDebug($"Trying to get map record steamid from mysql");
             try
             {
                 using (var connection = await OpenDatabaseConnectionAsync())

@@ -272,9 +272,9 @@ namespace SharpTimer
                     string playerTime = FormatTime(timerTicks);
                     string playerBonusTime = FormatTime(playerTimer.BonusTimerTicks);
                     string timerLine = playerTimer.IsBonusTimerRunning
-                                        ? $" <font color='gray' class='fontSize-s'>Bonus: {playerTimer.BonusStage}</font> <font class='' color='{primaryHUDcolor}'>{playerBonusTime}</font> <br>"
+                                        ? $" <font color='gray' class='fontSize-s'>Bonus: {playerTimer.BonusStage}</font> <font class='fontSize-l' color='{primaryHUDcolor}'>{playerBonusTime}</font> <br>"
                                         : isTimerRunning
-                                            ? $" <font color='gray' class='fontSize-s'>{GetPlayerPlacement(target)}</font> <font class='' color='{primaryHUDcolor}'>{playerTime}</font>{((playerTimer.CurrentMapStage != 0 && useStageTriggers == true) ? $"<font color='gray' class='fontSize-s'> {playerTimer.CurrentMapStage}/{stageTriggerCount}</font>" : "")} <br>"
+                                            ? $" <font color='gray' class='fontSize-s'>{GetPlayerPlacement(target)}</font> <font class='fontSize-l' color='{primaryHUDcolor}'>{playerTime}</font>{((playerTimer.CurrentMapStage != 0 && useStageTriggers == true) ? $"<font color='gray' class='fontSize-s'> {playerTimer.CurrentMapStage}/{stageTriggerCount}</font>" : "")} <br>"
                                             : playerTimer.IsReplaying
                                                 ? $" <font class='' color='red'>◉ REPLAY {FormatTime(playerReplays[target.Slot].CurrentPlaybackFrame)}</font> <br>"
                                                 : "";
@@ -286,9 +286,9 @@ namespace SharpTimer
                                           $"{(currentMapTier != null ? $" | Tier: {currentMapTier}" : "")}" +
                                           $"{(currentMapType != null ? $" | {currentMapType}" : "")}" +
                                           $"{((currentMapType == null && currentMapTier == null) ? $" {currentMapName} " : "")} </font> <br>"
-                                        : $" <font class='fontSize-s' color='gray'>{playerTimers[target.Slot].ReplayHUDString}</font>";
+                                        : $" <font class='fontSize-s' color='gray'>{playerTimers[target.Slot].ReplayHUDString}</font> <br>";
 
-                    string keysLine = $"<font class='fontSize-s' color='{secondaryHUDcolor}'>{((playerButtons & PlayerButtons.Moveleft) != 0 ? "A" : "_")} " +
+                    string keysLine = $"<font class='fontSize-l' color='{secondaryHUDcolor}'>{((playerButtons & PlayerButtons.Moveleft) != 0 ? "A" : "_")} " +
                                             $"{((playerButtons & PlayerButtons.Forward) != 0 ? "W" : "_")} " +
                                             $"{((playerButtons & PlayerButtons.Moveright) != 0 ? "D" : "_")} " +
                                             $"{((playerButtons & PlayerButtons.Back) != 0 ? "S" : "_")} " +

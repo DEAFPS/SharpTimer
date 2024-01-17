@@ -610,6 +610,17 @@ namespace SharpTimer
 
             SortedCachedRecords = GetSortedRecords();
 
+            currentMapStartC1 = new Vector(0, 0, 0);
+            currentMapStartC2 = new Vector(0, 0, 0);
+            currentMapEndC1 = new Vector(0, 0, 0);
+            currentMapEndC2 = new Vector(0, 0, 0);
+
+            currentRespawnPos = null;
+            currentRespawnAng = null;
+            
+            currentMapStartTriggerMaxs = null;
+            currentMapStartTriggerMins = null;
+            
             currentMapTier = null; //making sure previous map tier and type are wiped
             currentMapType = null;
             currentMapOverrideDisableTelehop = new string[0]; //making sure previous map overrides are reset

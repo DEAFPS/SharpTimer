@@ -34,6 +34,8 @@ namespace SharpTimer
         public string endBeamColor = "";
         public bool beamColorOverride = false;
         public string currentMapStartTrigger = "trigger_startzone";
+        public Vector? currentMapStartTriggerMaxs = null;
+        public Vector? currentMapStartTriggerMins = null;
         public string currentMapEndTrigger = "trigger_endzone";
         public Vector currentMapStartC1 = new Vector(0, 0, 0);
         public Vector currentMapStartC2 = new Vector(0, 0, 0);

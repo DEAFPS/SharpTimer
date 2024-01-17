@@ -120,7 +120,6 @@ namespace SharpTimer
             playerReplays[player.Slot] = new PlayerReplays();
             ReadReplayFromJson(player, player.SteamID.ToString());
 
-
             playerTimers[player.Slot].IsReplaying = playerTimers[player.Slot].IsReplaying ? false : true;
             playerTimers[player.Slot].ReplayHUDString = $"{player.PlayerName} | {playerTimers[player.Slot].PB}";
 
@@ -178,6 +177,9 @@ namespace SharpTimer
             }
 
             ReadReplayFromJson(player, srSteamID);
+
+            if (!playerReplays[player.Slot].replayFrames.Any()) return;
+
             if (useMySQL) _ = GetReplayVIPGif(srSteamID, player.Slot);
 
             playerTimers[player.Slot].IsReplaying = playerTimers[player.Slot].IsReplaying ? false : true;
@@ -242,6 +244,8 @@ namespace SharpTimer
 
                 ReadReplayFromJson(player, srSteamID);
 
+                if (!playerReplays[player.Slot].replayFrames.Any()) return;
+
                 if (useMySQL) _ = GetReplayVIPGif(srSteamID, player.Slot);
 
                 playerTimers[player.Slot].IsReplaying = playerTimers[player.Slot].IsReplaying ? false : true;
@@ -280,17 +284,16 @@ namespace SharpTimer
                 playerTimers[player.Slot].IsReplaying = false;
                 if (player.PlayerPawn.Value.MoveType != MoveType_t.MOVETYPE_WALK) player.PlayerPawn.Value.MoveType = MoveType_t.MOVETYPE_WALK;
                 RespawnPlayer(player, command);
+                playerReplays.Remove(player.Slot);
+                playerReplays[player.Slot] = new PlayerReplays();
+                playerTimers[player.Slot].IsTimerRunning = false;
+                playerTimers[player.Slot].TimerTicks = 0;
+                playerTimers[player.Slot].IsBonusTimerRunning = false;
+                playerTimers[player.Slot].BonusTimerTicks = 0;
+                playerReplays[player.Slot].CurrentPlaybackFrame = 0;
+                if (stageTriggers.Any()) playerTimers[player.Slot].StageTimes.Clear(); //remove previous stage times if the map has stages
+                if (stageTriggers.Any()) playerTimers[player.Slot].StageVelos.Clear(); //remove previous stage times if the map has stages
             }
-
-            playerReplays.Remove(player.Slot);
-            playerReplays[player.Slot] = new PlayerReplays();
-            playerTimers[player.Slot].IsTimerRunning = false;
-            playerTimers[player.Slot].TimerTicks = 0;
-            playerTimers[player.Slot].IsBonusTimerRunning = false;
-            playerTimers[player.Slot].BonusTimerTicks = 0;
-            playerReplays[player.Slot].CurrentPlaybackFrame = 0;
-            if (stageTriggers.Any()) playerTimers[player.Slot].StageTimes.Clear(); //remove previous stage times if the map has stages
-            if (stageTriggers.Any()) playerTimers[player.Slot].StageVelos.Clear(); //remove previous stage times if the map has stages
         }
 
         [ConsoleCommand("css_sthelp", "Prints all commands for the player")]
@@ -838,6 +841,46 @@ namespace SharpTimer
             }
         }
 
+        [ConsoleCommand("css_saveloc", "Saves a custom respawn point within the start trigger")]
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void SaveLocCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            if (!IsAllowedPlayer(player) || respawnEnabled == false) return;
+
+            SharpTimerDebug($"{player.PlayerName} calling css_rank...");
+
+            if (playerTimers[player.Slot].TicksSinceLastCmd < cmdCooldown)
+            {
+                player.PrintToChat(msgPrefix + $" Command is on cooldown. Chill...");
+                return;
+            }
+
+            if (useTriggers == false)
+            {
+                player.PrintToChat(msgPrefix + $" Current Map is using manual zones");
+                return;
+            }
+
+            // Get the player's current position and rotation
+            Vector currentPosition = player.Pawn.Value.CBodyComponent?.SceneNode?.AbsOrigin ?? new Vector(0, 0, 0);
+            QAngle currentRotation = player.PlayerPawn.Value.EyeAngles ?? new QAngle(0, 0, 0);
+
+            if (IsVectorInsideBox(currentPosition, currentMapStartTriggerMaxs, currentMapStartTriggerMins))
+            {
+                // Convert position and rotation to strings
+                string positionString = $"{currentPosition.X} {currentPosition.Y} {currentPosition.Z}";
+                string rotationString = $"{currentRotation.X} {currentRotation.Y} {currentRotation.Z}";
+
+                playerTimers[player.Slot].SaveLocPos = positionString;
+                playerTimers[player.Slot].SaveLocAng = rotationString;
+                player.PrintToChat(msgPrefix + $" Saved custom Start Zone RespawnPos!");
+            }
+            else
+            {
+                player.PrintToChat(msgPrefix + $" You are not inside the Start Zone!");
+            }
+        }
+
         [ConsoleCommand("css_stage", "Teleports you to a stage")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
         public void TPtoStagePlayer(CCSPlayerController? player, CommandInfo command)
@@ -941,7 +984,7 @@ namespace SharpTimer
                     playerTimers[player.Slot].StageTimes.Clear();
                 }
 
-                if (currentRespawnPos != null)
+                if (currentRespawnPos != null && playerTimers[player.Slot].SaveLocPos == null)
                 {
                     if (currentRespawnAng != null)
                     {
@@ -955,7 +998,14 @@ namespace SharpTimer
                 }
                 else
                 {
-                    player.PrintToChat(msgPrefix + $" {ChatColors.LightRed} No RespawnPos found for current map!");
+                    if(playerTimers[player.Slot].SaveLocPos != null && playerTimers[player.Slot].SaveLocAng != null)
+                    {
+                        player.PlayerPawn.Value.Teleport(ParseVector(playerTimers[player.Slot].SaveLocPos), ParseQAngle(playerTimers[player.Slot].SaveLocAng), new Vector(0, 0, 0));
+                    }
+                    else
+                    {
+                        player.PrintToChat(msgPrefix + $" {ChatColors.LightRed} No RespawnPos found for current map!");
+                    }
                 }
 
                 Server.NextFrame(() =>

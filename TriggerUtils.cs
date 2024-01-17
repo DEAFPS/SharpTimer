@@ -191,7 +191,7 @@ namespace SharpTimer
 
                 foreach (var info_tp in entityCache.InfoTeleportDestinations)
                 {
-                    if (info_tp.Entity?.Name != null && IsInsideTrigger(trigger.AbsOrigin, trigger.Collision.BoundingRadius, info_tp.AbsOrigin))
+                    if (info_tp.Entity?.Name != null && IsVectorInsideBox(info_tp.AbsOrigin, trigger.Collision.Mins + trigger.CBodyComponent.SceneNode.AbsOrigin, trigger.Collision.Maxs + trigger.CBodyComponent.SceneNode.AbsOrigin))
                     {
                         if (info_tp.CBodyComponent.SceneNode.AbsOrigin != null && info_tp.AbsRotation != null)
                         {
@@ -223,7 +223,7 @@ namespace SharpTimer
                 {
                     foreach (var info_tp in entityCache.InfoTeleportDestinations)
                     {
-                        if (info_tp.Entity?.Name != null && IsInsideTrigger(trigger.AbsOrigin, trigger.Collision.BoundingRadius, info_tp.AbsOrigin))
+                        if (info_tp.Entity?.Name != null && IsVectorInsideBox(info_tp.AbsOrigin, trigger.Collision.Mins + trigger.CBodyComponent.SceneNode.AbsOrigin, trigger.Collision.Maxs + trigger.CBodyComponent.SceneNode.AbsOrigin))
                         {
                             if (info_tp.CBodyComponent?.SceneNode?.AbsOrigin != null && info_tp.AbsRotation != null)
                             {
@@ -300,7 +300,7 @@ namespace SharpTimer
 
                     foreach (var info_tp in entityCache.InfoTeleportDestinations)
                     {
-                        if (info_tp.Entity?.Name != null && IsInsideTrigger(trigger.AbsOrigin, trigger.Collision.BoundingRadius, info_tp.AbsOrigin))
+                        if (info_tp.Entity?.Name != null && IsVectorInsideBox(info_tp.AbsOrigin, trigger.Collision.Mins + trigger.CBodyComponent.SceneNode.AbsOrigin, trigger.Collision.Maxs + trigger.CBodyComponent.SceneNode.AbsOrigin))
                         {
                             if (info_tp.CBodyComponent?.SceneNode?.AbsOrigin != null && info_tp.AbsRotation != null)
                             {
@@ -368,6 +368,8 @@ namespace SharpTimer
                 {
                     startMins = trigger.Collision.Mins + trigger.CBodyComponent.SceneNode.AbsOrigin;
                     startMaxs = trigger.Collision.Maxs + trigger.CBodyComponent.SceneNode.AbsOrigin;
+                    currentMapStartTriggerMaxs = startMaxs;
+                    currentMapStartTriggerMins = startMins;
                     continue;
                 }
 

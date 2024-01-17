@@ -163,13 +163,13 @@ namespace SharpTimer
                     else
                     {
                         Console.WriteLine($"Error: Failed to deserialize replay frames from {playerReplaysPath}");
-                        player.PrintToChat(msgPrefix + $" The requested replay seems to be corrupted");
+                        Server.NextFrame(() => player.PrintToChat(msgPrefix + $" The requested replay seems to be corrupted"));
                     }
                 }
                 else
                 {
                     Console.WriteLine($"File does not exist: {playerReplaysPath}");
-                    player.PrintToChat(msgPrefix + $" The requested replay does not exist");
+                    Server.NextFrame(() => player.PrintToChat(msgPrefix + $" The requested replay does not exist"));
                 }
             }
             catch (Exception ex)
