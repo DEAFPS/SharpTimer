@@ -1165,7 +1165,7 @@ namespace SharpTimer
 
         [ConsoleCommand("css_cp", "Sets a checkpoint")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-        public void SetPlayerCP(CCSPlayerController? player, CommandInfo command, bool fromSaveLoc = false)
+        public void SetPlayerCP(CCSPlayerController? player, CommandInfo command)
         {
             if (!IsAllowedPlayer(player) || cpEnabled == false) return;
             SharpTimerDebug($"{player.PlayerName} calling css_cp...");
@@ -1184,14 +1184,14 @@ namespace SharpTimer
 
             if (((PlayerFlags)player.Pawn.Value.Flags & PlayerFlags.FL_ONGROUND) != PlayerFlags.FL_ONGROUND && removeCpRestrictEnabled == false)
             {
-                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant set {(fromSaveLoc ? "loc" : "checkpoint")} while in air");
+                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant set {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")} while in air");
                 if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {cpSoundAir}");
                 return;
             }
 
             if (cpOnlyWhenTimerStopped == true && playerTimers[player.Slot].IsTimerBlocked == false)
             {
-                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant set {(fromSaveLoc ? "loc" : "checkpoint")} while timer is on, use {ChatColors.White}!timer");
+                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant set {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")} while timer is on, use {ChatColors.White}!timer");
                 if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {cpSoundAir}");
                 return;
             }
@@ -1225,14 +1225,14 @@ namespace SharpTimer
             int checkpointCount = playerCheckpoints[player.Slot].Count;
 
             // Print the chat message with the checkpoint count
-            player.PrintToChat(msgPrefix + $"{(fromSaveLoc ? "Loc" : "Checkpoint")} set! {primaryChatColor}#{checkpointCount}");
+            player.PrintToChat(msgPrefix + $"{(currentMapName.Contains("surf_") ? "Loc" : "Checkpoint")} set! {primaryChatColor}#{checkpointCount}");
             if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {cpSound}");
             SharpTimerDebug($"{player.PlayerName} css_cp to {checkpointCount} {positionString} {rotationString} {speedString}");
         }
 
         [ConsoleCommand("css_tp", "Tp to the most recent checkpoint")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-        public void TpPlayerCP(CCSPlayerController? player, CommandInfo command, bool fromSaveLoc = false)
+        public void TpPlayerCP(CCSPlayerController? player, CommandInfo command)
         {
             if (!IsAllowedPlayer(player) || cpEnabled == false) return;
             SharpTimerDebug($"{player.PlayerName} calling css_tp...");
@@ -1251,7 +1251,7 @@ namespace SharpTimer
 
             if (cpOnlyWhenTimerStopped == true && playerTimers[player.Slot].IsTimerBlocked == false)
             {
-                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant use {(fromSaveLoc ? "loc" : "checkpoint")} while timer is on, use {ChatColors.White}!timer");
+                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant use {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")} while timer is on, use {ChatColors.White}!timer");
                 if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {cpSoundAir}");
                 return;
             }
@@ -1261,7 +1261,7 @@ namespace SharpTimer
             // Check if the player has any checkpoints
             if (!playerCheckpoints.ContainsKey(player.Slot) || playerCheckpoints[player.Slot].Count == 0)
             {
-                player.PrintToChat(msgPrefix + $"No {(fromSaveLoc ? "loc" : "checkpoint")} set!");
+                player.PrintToChat(msgPrefix + $"No {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")} set!");
                 return;
             }
 
@@ -1285,13 +1285,13 @@ namespace SharpTimer
 
             // Play a sound or provide feedback to the player
             if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {tpSound}");
-            player.PrintToChat(msgPrefix + $"Teleported to most recent {(fromSaveLoc ? "loc" : "checkpoint")}!");
+            player.PrintToChat(msgPrefix + $"Teleported to most recent {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")}!");
             SharpTimerDebug($"{player.PlayerName} css_tp to {position} {rotation} {speed}");
         }
 
         [ConsoleCommand("css_prevcp", "Tp to the previous checkpoint")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-        public void TpPreviousCP(CCSPlayerController? player, CommandInfo command, bool fromSaveLoc = false)
+        public void TpPreviousCP(CCSPlayerController? player, CommandInfo command)
         {
             if (!IsAllowedPlayer(player) || cpEnabled == false) return;
             SharpTimerDebug($"{player.PlayerName} calling css_prevcp...");
@@ -1310,7 +1310,7 @@ namespace SharpTimer
 
             if (cpOnlyWhenTimerStopped == true && playerTimers[player.Slot].IsTimerBlocked == false)
             {
-                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant use {(fromSaveLoc ? "loc" : "checkpoint")} while timer is on, use {ChatColors.White}!timer");
+                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant use {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")} while timer is on, use {ChatColors.White}!timer");
                 if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {cpSoundAir}");
                 return;
             }
@@ -1319,7 +1319,7 @@ namespace SharpTimer
 
             if (!playerCheckpoints.TryGetValue(player.Slot, out List<PlayerCheckpoint> checkpoints) || checkpoints.Count == 0)
             {
-                player.PrintToChat(msgPrefix + $"No {(fromSaveLoc ? "loc" : "checkpoint")} set!");
+                player.PrintToChat(msgPrefix + $"No {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")} set!");
                 return;
             }
 
@@ -1347,14 +1347,14 @@ namespace SharpTimer
                 player.PlayerPawn.Value.Teleport(position, rotation, new Vector(0, 0, 0));
                 // Play a sound or provide feedback to the player
                 if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {tpSound}");
-                player.PrintToChat(msgPrefix + $"Teleported to the previous {(fromSaveLoc ? "loc" : "checkpoint")}!");
+                player.PrintToChat(msgPrefix + $"Teleported to the previous {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")}!");
                 SharpTimerDebug($"{player.PlayerName} css_prevcp to {position} {rotation}");
             }
         }
 
         [ConsoleCommand("css_nextcp", "Tp to the next checkpoint")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
-        public void TpNextCP(CCSPlayerController? player, CommandInfo command, bool fromSaveLoc = false)
+        public void TpNextCP(CCSPlayerController? player, CommandInfo command)
         {
             if (!IsAllowedPlayer(player) || cpEnabled == false) return;
             SharpTimerDebug($"{player.PlayerName} calling css_nextcp...");
@@ -1373,7 +1373,7 @@ namespace SharpTimer
 
             if (cpOnlyWhenTimerStopped == true && playerTimers[player.Slot].IsTimerBlocked == false)
             {
-                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant use {(fromSaveLoc ? "loc" : "checkpoint")} while timer is on, use {ChatColors.White}!timer");
+                player.PrintToChat(msgPrefix + $"{ChatColors.LightRed}Cant use {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")} while timer is on, use {ChatColors.White}!timer");
                 if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {cpSoundAir}");
                 return;
             }
@@ -1382,7 +1382,7 @@ namespace SharpTimer
 
             if (!playerCheckpoints.TryGetValue(player.Slot, out List<PlayerCheckpoint> checkpoints) || checkpoints.Count == 0)
             {
-                player.PrintToChat(msgPrefix + $"No {(fromSaveLoc ? "loc" : "checkpoint")} set!");
+                player.PrintToChat(msgPrefix + $"No {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")} set!");
                 return;
             }
 
@@ -1411,7 +1411,7 @@ namespace SharpTimer
 
                 // Play a sound or provide feedback to the player
                 if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {tpSound}");
-                player.PrintToChat(msgPrefix + $"Teleported to the next {(fromSaveLoc ? "loc" : "checkpoint")}!");
+                player.PrintToChat(msgPrefix + $"Teleported to the next {(currentMapName.Contains("surf_") ? "loc" : "checkpoint")}!");
                 SharpTimerDebug($"{player.PlayerName} css_nextcp to {position} {rotation}");
             }
         }

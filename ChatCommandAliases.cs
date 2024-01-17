@@ -1,10 +1,6 @@
-using System.Text.Json;
-using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
-using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Utils;
 
 
 namespace SharpTimer
@@ -12,38 +8,38 @@ namespace SharpTimer
     public partial class SharpTimer
     {
         [ConsoleCommand("css_saveloc", "alias for !cp")]
-        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
-        public void SaveLocAlias(CCSPlayerController player, CommandInfo commandInfo)
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void SaveLocAlias(CCSPlayerController? player, CommandInfo command)
         {
-            SetPlayerCP(player, commandInfo, true);
+            SetPlayerCP(player, command);
         }
 
         [ConsoleCommand("css_loadloc", "alias for !tp")]
-        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
-        public void LoadLocAlias(CCSPlayerController player, CommandInfo commandInfo)
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void LoadLocAlias(CCSPlayerController? player, CommandInfo command)
         {
-            TpPlayerCP(player, commandInfo, true);
+            TpPlayerCP(player, command);
         }
 
         [ConsoleCommand("css_prevloc", "alias for !prevcp")]
-        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
-        public void PrevLocAlias(CCSPlayerController player, CommandInfo commandInfo)
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void PrevLocAlias(CCSPlayerController? player, CommandInfo command)
         {
-            TpPreviousCP(player, commandInfo, true);
+            TpPreviousCP(player, command);
         }
 
         [ConsoleCommand("css_nextloc", "alias for !nextcp")]
-        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
-        public void NextLocAlias(CCSPlayerController player, CommandInfo commandInfo)
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void NextLocAlias(CCSPlayerController? player, CommandInfo command)
         {
-            TpNextCP(player, commandInfo, true);
+            TpNextCP(player, command);
         }
 
         [ConsoleCommand("css_b", "alias for !rb")]
-        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
-        public void BAlias(CCSPlayerController player, CommandInfo commandInfo)
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void BAlias(CCSPlayerController? player, CommandInfo command)
         {
-            RespawnBonusPlayer(player, commandInfo);
+            RespawnBonusPlayer(player, command);
         }
     }
 }
