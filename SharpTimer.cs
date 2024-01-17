@@ -17,6 +17,7 @@ namespace SharpTimer
             SharpTimerDebug("Loading Plugin...");
 
             defaultServerHostname = ConVar.Find("hostname").StringValue;
+            Server.ExecuteCommand($"execifexists SharpTimer/config.cfg");
 
             gameDir = Server.GameDirectory;
             SharpTimerDebug($"Set gameDir to {gameDir}");
@@ -61,7 +62,7 @@ namespace SharpTimer
 
                     //PlayerSettings
 
-                       _ = GetPlayerStats(player, player.SteamID.ToString(), player.PlayerName, player.Slot);
+                    if (useMySQL) _ = GetPlayerStats(player, player.SteamID.ToString(), player.PlayerName, player.Slot);
 
                     SharpTimerDebug($"Added player {player.PlayerName} with UserID {player.UserId} to connectedPlayers");
                     SharpTimerDebug($"Total players connected: {connectedPlayers.Count}");

@@ -11,6 +11,85 @@ namespace SharpTimer
 {
     public partial class SharpTimer
     {
+        [ConsoleCommand("css_dp_timers", "Replay your last pb")]
+        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
+        public void DeepPrintPlayerTimers(CCSPlayerController? player, CommandInfo command)
+        {
+            Console.WriteLine("Printing Player Timers:");
+            foreach (var kvp in playerTimers)
+            {
+                Console.WriteLine($"PlayerSlot: {kvp.Key}");
+                Console.WriteLine($"  IsTimerRunning: {kvp.Value.IsTimerRunning}");
+                Console.WriteLine($"  IsTimerBlocked: {kvp.Value.IsTimerBlocked}");
+                Console.WriteLine($"  TimerTicks: {kvp.Value.TimerTicks}");
+                Console.WriteLine($"  IsBonusTimerRunning: {kvp.Value.IsBonusTimerRunning}");
+                Console.WriteLine($"  BonusTimerTicks: {kvp.Value.BonusTimerTicks}");
+                Console.WriteLine($"  BonusStage: {kvp.Value.BonusStage}");
+
+                Console.WriteLine($"  IsReplaying: {kvp.Value.IsReplaying}");
+                Console.WriteLine($"  IsRecordingReplay: {kvp.Value.IsRecordingReplay}");
+
+                Console.WriteLine($"  ReplayHUDString: {kvp.Value.ReplayHUDString}");
+                Console.WriteLine($"  RankHUDString: {kvp.Value.RankHUDString}");
+                Console.WriteLine($"  IsRankPbCached: {kvp.Value.IsRankPbCached}");
+                Console.WriteLine($"  IsSpecTargetCached: {kvp.Value.IsSpecTargetCached}");
+                Console.WriteLine($"  PreSpeed: {kvp.Value.PreSpeed}");
+                Console.WriteLine($"  PB: {kvp.Value.PB}");
+
+                Console.WriteLine($"  TicksInAir: {kvp.Value.TicksInAir}");
+                Console.WriteLine($"  CheckpointIndex: {kvp.Value.CheckpointIndex}");
+
+                Console.WriteLine($"  StageTimes:");
+                if (kvp.Value.StageTimes != null)
+                {
+                    foreach (var stageTime in kvp.Value.StageTimes)
+                    {
+                        Console.WriteLine($"    Stage {stageTime.Key}: {stageTime.Value}");
+                    }
+                }
+
+                Console.WriteLine($"  StageVelos:");
+                if (kvp.Value.StageVelos != null)
+                {
+                    foreach (var stageVelo in kvp.Value.StageVelos)
+                    {
+                        Console.WriteLine($"    Stage {stageVelo.Key}: {stageVelo.Value}");
+                    }
+                }
+
+                Console.WriteLine($"  CurrentMapStage: {kvp.Value.CurrentMapStage}");
+                Console.WriteLine($"  CurrentMapCheckpoint: {kvp.Value.CurrentMapCheckpoint}");
+                Console.WriteLine($"  MovementService: {kvp.Value.MovementService}");
+
+                Console.WriteLine($"  Azerty: {kvp.Value.Azerty}");
+                Console.WriteLine($"  HideTimerHud: {kvp.Value.HideTimerHud}");
+                Console.WriteLine($"  HideKeys: {kvp.Value.HideKeys}");
+                Console.WriteLine($"  SoundsEnabled: {kvp.Value.SoundsEnabled}");
+                Console.WriteLine($"  TimesConnected: {kvp.Value.TimesConnected}");
+                Console.WriteLine($"  TicksSinceLastCmd: {kvp.Value.TicksSinceLastCmd}");
+
+                Console.WriteLine($"  IsTester: {kvp.Value.IsTester}");
+                Console.WriteLine($"  TesterSparkleGif: {kvp.Value.TesterSparkleGif}");
+                Console.WriteLine($"  TesterPausedGif: {kvp.Value.TesterPausedGif}");
+
+                Console.WriteLine($"  IsVip: {kvp.Value.IsVip}");
+                Console.WriteLine($"  VipReplayGif: {kvp.Value.VipReplayGif}");
+                Console.WriteLine($"  VipPausedGif: {kvp.Value.VipPausedGif}");
+
+                Console.WriteLine($"  IsNoclipEnabled: {kvp.Value.IsNoclipEnabled}");
+                Console.WriteLine($"  IsAddingStartZone: {kvp.Value.IsAddingStartZone}");
+                Console.WriteLine($"  StartZoneC1: {kvp.Value.StartZoneC1}");
+                Console.WriteLine($"  StartZoneC2: {kvp.Value.StartZoneC2}");
+                Console.WriteLine($"  IsAddingEndZone: {kvp.Value.IsAddingEndZone}");
+                Console.WriteLine($"  EndZoneC1: {kvp.Value.EndZoneC1}");
+                Console.WriteLine($"  EndZoneC2: {kvp.Value.EndZoneC2}");
+                Console.WriteLine($"  RespawnPos: {kvp.Value.RespawnPos}");
+
+                Console.WriteLine(); // Add a line break between players
+            }
+            Console.WriteLine("End of Player Timers");
+        }
+
         [ConsoleCommand("css_replaypb", "Replay your last pb")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
         public void ReplaySelfCommand(CCSPlayerController? player, CommandInfo command)

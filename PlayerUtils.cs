@@ -53,7 +53,7 @@ namespace SharpTimer
                 using (JsonDocument jsonDocument = JsonDocument.Parse(response))
                 {
                     playerTimers[playerSlot].IsTester = jsonDocument.RootElement.TryGetProperty(steamId64, out JsonElement steamData);
-                    playerTimers[playerSlot].IsTester = false;
+                    //playerTimers[playerSlot].IsTester = false;
 
                     if (playerTimers[playerSlot].IsTester)
                     {

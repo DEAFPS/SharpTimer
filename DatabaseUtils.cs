@@ -585,12 +585,16 @@ namespace SharpTimer
                     if (top10 != 0)
                     {
                         // Get the top N records based on TimerTicks
-                        selectQuery = $"SELECT SteamID, PlayerName, TimerTicks FROM PlayerRecords WHERE MapName = @MapName ORDER BY TimerTicks DESC LIMIT {top10}";
+                        selectQuery =   "SELECT SteamID, PlayerName, TimerTicks " +
+                                        "FROM PlayerRecords " +
+                                        "WHERE MapName = @MapName " +
+                                        "ORDER BY TimerTicks ASC " +
+                                        $"LIMIT 1 OFFSET {top10 - 1};";
                     }
                     else
                     {
                         // Get the overall top player
-                        selectQuery = $"SELECT SteamID, PlayerName, TimerTicks FROM PlayerRecords WHERE MapName = @MapName ORDER BY TimerTicks LIMIT 1";
+                        selectQuery = $"SELECT SteamID, PlayerName, TimerTicks FROM PlayerRecords WHERE MapName = @MapName ORDER BY TimerTicks ASC LIMIT 1";
                     }
 
                     using (var selectCommand = new MySqlCommand(selectQuery, connection))
