@@ -756,7 +756,18 @@ namespace SharpTimer
                     await connection.OpenAsync();
 
                     // Check if the table exists, and create it if necessary
-                    string createTableQuery = "CREATE TABLE IF NOT EXISTS PlayerRecords (SteamID VARCHAR(255), PlayerName VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, TimerTicks INT, FormattedTime VARCHAR(255), MapName VARCHAR(255), PRIMARY KEY (SteamID, MapName))";
+                    string createTableQuery = @"CREATE TABLE IF NOT EXISTS PlayerRecords (
+                                            MapName VARCHAR(255),
+                                            SteamID VARCHAR(255),
+                                            PlayerName VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+                                            TimerTicks INT,
+                                            FormattedTime VARCHAR(255),
+                                            UnixStamp INT,
+                                            TimesFinished INT,
+                                            LastFinished INT,
+                                            PRIMARY KEY (MapName, SteamID)
+                                        )";
+
                     using (var createTableCommand = new MySqlCommand(createTableQuery, connection))
                     {
                         await createTableCommand.ExecuteNonQueryAsync();
@@ -783,8 +794,8 @@ namespace SharpTimer
 
                             // Check if the player is already in the database
                             string insertOrUpdateQuery = @"
-                                INSERT INTO PlayerRecords (SteamID, PlayerName, TimerTicks, FormattedTime, MapName, UnixStamp)
-                                VALUES (@SteamID, @PlayerName, @TimerTicks, @FormattedTime, @MapName, @UnixStamp)
+                                INSERT INTO PlayerRecords (SteamID, PlayerName, TimerTicks, FormattedTime, MapName, UnixStamp, TimesFinished, LastFinished)
+                                VALUES (@SteamID, @PlayerName, @TimerTicks, @FormattedTime, @MapName, @UnixStamp, @TimesFinished, @LastFinished)
                                 ON DUPLICATE KEY UPDATE
                                 TimerTicks = IF(@TimerTicks < TimerTicks, @TimerTicks, TimerTicks),
                                 FormattedTime = IF(@TimerTicks < TimerTicks, @FormattedTime, FormattedTime)";
@@ -797,6 +808,8 @@ namespace SharpTimer
                                 insertOrUpdateCommand.Parameters.AddWithValue("@FormattedTime", FormatTime(playerRecord.TimerTicks));
                                 insertOrUpdateCommand.Parameters.AddWithValue("@MapName", mapName);
                                 insertOrUpdateCommand.Parameters.AddWithValue("@UnixStamp", 0);
+                                insertOrUpdateCommand.Parameters.AddWithValue("@TimesFinished", 0);
+                                insertOrUpdateCommand.Parameters.AddWithValue("@LastFinished", 0);
 
                                 await insertOrUpdateCommand.ExecuteNonQueryAsync();
                             }
