@@ -402,20 +402,20 @@ namespace SharpTimer
             SharpTimerDebug($"Printing Commands for {player.PlayerName}");
             player.PrintToChat($"{msgPrefix}Available Commands:");
 
-            if (respawnEnabled) player.PrintToChat($"{msgPrefix}!r (css_r) - Respawns you");
-            if (respawnEnabled && bonusRespawnPoses.Any()) player.PrintToChat($"{msgPrefix}!rb <#> (css_rb) - Respawns you to a bonus");
-            if (topEnabled) player.PrintToChat($"{msgPrefix}!top (css_top) - Lists top 10 records on this map");
-            if (topEnabled && bonusRespawnPoses.Any()) player.PrintToChat($"{msgPrefix}!topbonus <#> (css_topbonus) - Lists top 10 records of a bonus");
-            if (rankEnabled) player.PrintToChat($"{msgPrefix}!rank (css_rank) - Shows your current rank and pb");
-            if (goToEnabled) player.PrintToChat($"{msgPrefix}!goto <name> (css_goto) - Teleports you to a player");
-            if (stageTriggerPoses.Any()) player.PrintToChat($"{msgPrefix}!stage <#> (css_goto) - Teleports you to a stage");
+            if (respawnEnabled)                             player.PrintToChat($"{msgPrefix}!r (css_r) - Respawns you");
+            if (respawnEnabled && bonusRespawnPoses.Any())  player.PrintToChat($"{msgPrefix}!rb <#> / !b <#> (css_rb / css_b) - Respawns you to a bonus");
+            if (topEnabled)                                 player.PrintToChat($"{msgPrefix}!top (css_top) - Lists top 10 records on this map");
+            if (topEnabled && bonusRespawnPoses.Any())      player.PrintToChat($"{msgPrefix}!topbonus <#> (css_topbonus) - Lists top 10 records of a bonus");
+            if (rankEnabled)                                player.PrintToChat($"{msgPrefix}!rank (css_rank) - Shows your current rank and pb");
+            if (goToEnabled)                                player.PrintToChat($"{msgPrefix}!goto <name> (css_goto) - Teleports you to a player");
+            if (stageTriggerPoses.Any())                    player.PrintToChat($"{msgPrefix}!stage <#> (css_goto) - Teleports you to a stage");
 
             if (cpEnabled)
             {
-                player.PrintToChat($"{msgPrefix}!cp (css_cp) - Sets a Checkpoint");
-                player.PrintToChat($"{msgPrefix}!tp (css_tp) - Teleports you to the last Checkpoint");
-                player.PrintToChat($"{msgPrefix}!prevcp (css_prevcp) - Teleports you one Checkpoint back");
-                player.PrintToChat($"{msgPrefix}!nextcp (css_nextcp) - Teleports you one Checkpoint forward");
+                player.PrintToChat($"{msgPrefix}!cp / !saveloc (css_cp / css_saveloc) - Sets a Checkpoint");
+                player.PrintToChat($"{msgPrefix}!tp / !loadloc (css_tp / css_loadloc) - Teleports you to the last Checkpoint");
+                player.PrintToChat($"{msgPrefix}!prevcp / !prevloc (css_prevcp / css_prevloc) - Teleports you one Checkpoint back");
+                player.PrintToChat($"{msgPrefix}!nextcp / !nextloc (css_nextcp / css_nextloc) - Teleports you one Checkpoint forward");
             }
         }
 
