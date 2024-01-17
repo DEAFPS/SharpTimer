@@ -4,6 +4,7 @@ using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
+using System.Drawing;
 using System.Text;
 using System.Text.Json;
 using Vector = CounterStrikeSharp.API.Modules.Utils.Vector;
@@ -75,6 +76,68 @@ namespace SharpTimer
             }
         }
 
+        private void OnPlayerConnect(CCSPlayerController? player)
+        {
+            connectedPlayers[player.Slot] = new CCSPlayerController(player.Handle);
+            playerTimers[player.Slot] = new PlayerTimerInfo();
+            if (enableReplays) playerReplays[player.Slot] = new PlayerReplays();
+            if (connectMsgEnabled == true) Server.PrintToChatAll($"{msgPrefix}Player {ChatColors.Red}{player.PlayerName} {ChatColors.White}connected!");
+            if (cmdJoinMsgEnabled == true) PrintAllEnabledCommands(player);
+            playerTimers[player.Slot].MovementService = new CCSPlayer_MovementServices(player.PlayerPawn.Value.MovementServices!.Handle);
+            playerTimers[player.Slot].StageTimes = new Dictionary<int, int>();
+            playerTimers[player.Slot].StageVelos = new Dictionary<int, string>();
+            playerTimers[player.Slot].CurrentMapStage = 0;
+            playerTimers[player.Slot].CurrentMapCheckpoint = 0;
+            playerTimers[player.Slot].IsRecordingReplay = false;
+            playerTimers[player.Slot].SetRespawnPos = null;
+            playerTimers[player.Slot].SetRespawnAng = null;
+
+            _ = IsPlayerATester(player.SteamID.ToString(), player.Slot);
+
+            if (removeLegsEnabled == true) player.PlayerPawn.Value.Render = Color.FromArgb(254, 254, 254, 254);
+
+            //PlayerSettings
+            if (useMySQL) _ = GetPlayerStats(player, player.SteamID.ToString(), player.PlayerName, player.Slot);
+
+            SharpTimerDebug($"Added player {player.PlayerName} with UserID {player.UserId} to connectedPlayers");
+            SharpTimerDebug($"Total players connected: {connectedPlayers.Count}");
+            SharpTimerDebug($"Total playerTimers: {playerTimers.Count}");
+            SharpTimerDebug($"Total playerCheckpoints: {playerCheckpoints.Count}");
+        }
+
+        private void OnPlayerDisconnect(CCSPlayerController? player)
+        {
+            if (connectedPlayers.TryGetValue(player.Slot, out var connectedPlayer))
+            {
+                connectedPlayers.Remove(player.Slot);
+
+                //schizo removing data from memory
+                playerTimers[player.Slot] = new PlayerTimerInfo();
+                playerTimers.Remove(player.Slot);
+
+                //schizo removing data from memory
+                playerCheckpoints[player.Slot] = new List<PlayerCheckpoint>();
+                playerCheckpoints.Remove(player.Slot);
+
+                specTargets.Remove(player.Pawn.Value.EntityHandle.Index);
+
+                if (enableReplays)
+                {
+                    //schizo removing data from memory
+                    playerReplays[player.Slot] = new PlayerReplays();
+                    playerReplays.Remove(player.Slot);
+                }
+
+                SharpTimerDebug($"Removed player {connectedPlayer.PlayerName} with UserID {connectedPlayer.UserId} from connectedPlayers.");
+                SharpTimerDebug($"Removed specTarget index {player.Pawn.Value.EntityHandle.Index} from specTargets.");
+                SharpTimerDebug($"Total players connected: {connectedPlayers.Count}");
+                SharpTimerDebug($"Total playerTimers: {playerTimers.Count}");
+                SharpTimerDebug($"Total specTargets: {specTargets.Count}");
+
+                if (connectMsgEnabled == true) Server.PrintToChatAll($"{msgPrefix}Player {ChatColors.Red}{connectedPlayer.PlayerName} {ChatColors.White}disconnected!");
+            }
+        }
+
         public void TimerOnTick()
         {
             var updates = new Dictionary<int, PlayerTimerInfo>();
@@ -120,7 +183,7 @@ namespace SharpTimer
                                             : playerTimer.IsReplaying
                                                 ? $" <font class='' color='red'>◉ REPLAY {FormatTime(playerReplays[player.Slot].CurrentPlaybackFrame)}</font> <br>"
                                                 : "";
-                    
+
                     //string veloLine = $" {(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")}<font class='fontSize-s' color='{tertiaryHUDcolor}'>Speed:</font> <font class='fontSize-l' color='{secondaryHUDcolor}'>{formattedPlayerVel}</font> <font class='fontSize-s' color='gray'>({formattedPlayerPre})</font>{(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")} <br>";
                     string veloLine = $" {(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")}<font class='fontSize-s' color='{tertiaryHUDcolor}'>Speed:</font> {(playerTimer.IsReplaying ? "<font class=''" : "<font class='fontSize-l'")} color='{secondaryHUDcolor}'>{formattedPlayerVel}</font> <font class='fontSize-s' color='gray'>({formattedPlayerPre})</font>{(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")} <br>";
                     string infoLine = !playerTimer.IsReplaying
@@ -137,12 +200,12 @@ namespace SharpTimer
                                             $"{((playerButtons & PlayerButtons.Jump) != 0 ? "J" : "_")} " +
                                             $"{((playerButtons & PlayerButtons.Duck) != 0 ? "C" : "_")}";
 
-                    string hudContent = timerLine + 
+                    string hudContent = timerLine +
                                         veloLine +
                                         infoLine +
                                         ((playerTimer.IsTester && !isTimerRunning && !playerTimer.IsBonusTimerRunning && !playerTimer.IsReplaying) ? playerTimer.TesterPausedGif : "") +
-                                        ((playerTimer.IsVip && !playerTimer.IsTester && !isTimerRunning && !playerTimer.IsBonusTimerRunning && !playerTimer.IsReplaying) ? $"<br><img src='https://i.imgur.com/{playerTimer.VipPausedGif}.gif'><br>" : "") +    
-                                        ((playerTimer.IsReplaying && playerTimer.VipReplayGif != "x") ? $"<br><img src='https://i.imgur.com/{playerTimer.VipReplayGif}.gif'><br>" : "");     
+                                        ((playerTimer.IsVip && !playerTimer.IsTester && !isTimerRunning && !playerTimer.IsBonusTimerRunning && !playerTimer.IsReplaying) ? $"<br><img src='https://i.imgur.com/{playerTimer.VipPausedGif}.gif'><br>" : "") +
+                                        ((playerTimer.IsReplaying && playerTimer.VipReplayGif != "x") ? $"<br><img src='https://i.imgur.com/{playerTimer.VipReplayGif}.gif'><br>" : "");
 
                     updates[player.Slot] = playerTimer;
 
@@ -278,7 +341,7 @@ namespace SharpTimer
                                             : playerTimer.IsReplaying
                                                 ? $" <font class='' color='red'>◉ REPLAY {FormatTime(playerReplays[target.Slot].CurrentPlaybackFrame)}</font> <br>"
                                                 : "";
-                    
+
                     //string veloLine = $" {(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")}<font class='fontSize-s' color='{tertiaryHUDcolor}'>Speed:</font> <font class='' color='{secondaryHUDcolor}'>{formattedPlayerVel}</font> <font class='fontSize-s' color='gray'>({formattedPlayerPre})</font>{(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")} <br>";
                     string veloLine = $" {(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")}<font class='fontSize-s' color='{tertiaryHUDcolor}'>Speed:</font> <font class='' color='{secondaryHUDcolor}'>{formattedPlayerVel}</font> <font class='fontSize-s' color='gray'>({formattedPlayerPre})</font>{(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")} <br>";
                     string infoLine = !playerTimer.IsReplaying
@@ -295,12 +358,12 @@ namespace SharpTimer
                                             $"{((playerButtons & PlayerButtons.Jump) != 0 ? "J" : "_")} " +
                                             $"{((playerButtons & PlayerButtons.Duck) != 0 ? "C" : "_")}</font>";
 
-                    string hudContent = timerLine + 
+                    string hudContent = timerLine +
                                         veloLine +
                                         infoLine +
                                         keysLine +
                                         ((playerTimer.IsTester && !isTimerRunning && !playerTimer.IsBonusTimerRunning && !playerTimer.IsReplaying) ? playerTimer.TesterPausedGif : "") +
-                                        ((playerTimer.IsVip && !playerTimer.IsTester && !isTimerRunning && !playerTimer.IsBonusTimerRunning && !playerTimer.IsReplaying) ? $"<br><img src='https://i.imgur.com/{playerTimer.VipPausedGif}.gif'><br>" : ""); 
+                                        ((playerTimer.IsVip && !playerTimer.IsTester && !isTimerRunning && !playerTimer.IsBonusTimerRunning && !playerTimer.IsReplaying) ? $"<br><img src='https://i.imgur.com/{playerTimer.VipPausedGif}.gif'><br>" : "");
 
                     if (playerTimer.HideTimerHud != true)
                     {

@@ -127,9 +127,9 @@ namespace SharpTimer
         public string? EndZoneC2 { get; set; }
         public string? RespawnPos { get; set; }
 
-        //saveloc
-        public string? SaveLocPos { get; set; }
-        public string? SaveLocAng { get; set; }
+        //set respawn
+        public string? SetRespawnPos { get; set; }
+        public string? SetRespawnAng { get; set; }
     }
 
     //Replay stuff

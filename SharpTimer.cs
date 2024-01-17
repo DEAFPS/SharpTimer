@@ -44,33 +44,7 @@ namespace SharpTimer
                 }
                 else
                 {
-                    connectedPlayers[player.Slot] = new CCSPlayerController(player.Handle);
-                    playerTimers[player.Slot] = new PlayerTimerInfo();
-                    if (enableReplays) playerReplays[player.Slot] = new PlayerReplays();
-                    if (connectMsgEnabled == true) Server.PrintToChatAll($"{msgPrefix}Player {ChatColors.Red}{player.PlayerName} {ChatColors.White}connected!");
-                    if (cmdJoinMsgEnabled == true) PrintAllEnabledCommands(player);
-                    playerTimers[player.Slot].MovementService = new CCSPlayer_MovementServices(player.PlayerPawn.Value.MovementServices!.Handle);
-                    playerTimers[player.Slot].StageTimes = new Dictionary<int, int>();
-                    playerTimers[player.Slot].StageVelos = new Dictionary<int, string>();
-                    playerTimers[player.Slot].CurrentMapStage = 0;
-                    playerTimers[player.Slot].CurrentMapCheckpoint = 0;
-                    playerTimers[player.Slot].IsRecordingReplay = false;
-                    playerTimers[player.Slot].SaveLocPos = null;
-                    playerTimers[player.Slot].SaveLocAng = null;
-
-                    _ = IsPlayerATester(player.SteamID.ToString(), player.Slot);
-
-                    if (removeLegsEnabled == true) player.PlayerPawn.Value.Render = Color.FromArgb(254, 254, 254, 254);
-
-                    //PlayerSettings
-
-                    if (useMySQL) _ = GetPlayerStats(player, player.SteamID.ToString(), player.PlayerName, player.Slot);
-
-                    SharpTimerDebug($"Added player {player.PlayerName} with UserID {player.UserId} to connectedPlayers");
-                    SharpTimerDebug($"Total players connected: {connectedPlayers.Count}");
-                    SharpTimerDebug($"Total playerTimers: {playerTimers.Count}");
-                    SharpTimerDebug($"Total playerCheckpoints: {playerCheckpoints.Count}");
-
+                    OnPlayerConnect(player);
                     return HookResult.Continue;
                 }
             });
@@ -120,22 +94,7 @@ namespace SharpTimer
                 }
                 else
                 {
-                    if (connectedPlayers.TryGetValue(player.Slot, out var connectedPlayer))
-                    {
-                        connectedPlayers.Remove(player.Slot);
-                        playerTimers.Remove(player.Slot);
-                        playerCheckpoints.Remove(player.Slot);
-                        specTargets.Remove(player.Pawn.Value.EntityHandle.Index);
-                        if (enableReplays) playerReplays.Remove(player.Slot);
-                        SharpTimerDebug($"Removed player {connectedPlayer.PlayerName} with UserID {connectedPlayer.UserId} from connectedPlayers.");
-                        SharpTimerDebug($"Removed specTarget index {player.Pawn.Value.EntityHandle.Index} from specTargets.");
-                        SharpTimerDebug($"Total players connected: {connectedPlayers.Count}");
-                        SharpTimerDebug($"Total playerTimers: {playerTimers.Count}");
-                        SharpTimerDebug($"Total specTargets: {specTargets.Count}");
-
-                        if (connectMsgEnabled == true) Server.PrintToChatAll($"{msgPrefix}Player {ChatColors.Red}{connectedPlayer.PlayerName} {ChatColors.White}disconnected!");
-                    }
-
+                    OnPlayerDisconnect(player);
                     return HookResult.Continue;
                 }
             });
