@@ -412,10 +412,10 @@ namespace SharpTimer
 
             if (cpEnabled)
             {
-                player.PrintToChat($"{msgPrefix}!cp / !saveloc (css_cp / css_saveloc) - Sets a Checkpoint");
-                player.PrintToChat($"{msgPrefix}!tp / !loadloc (css_tp / css_loadloc) - Teleports you to the last Checkpoint");
-                player.PrintToChat($"{msgPrefix}!prevcp / !prevloc (css_prevcp / css_prevloc) - Teleports you one Checkpoint back");
-                player.PrintToChat($"{msgPrefix}!nextcp / !nextloc (css_nextcp / css_nextloc) - Teleports you one Checkpoint forward");
+                player.PrintToChat($"{msgPrefix}{(currentMapName.Contains("surf_") ? "!saveloc (css_saveloc) - Saves a Loc" : "!cp (css_cp) - Sets a Checkpoint")}");
+                player.PrintToChat($"{msgPrefix}{(currentMapName.Contains("surf_") ? "!loadloc (css_loadloc) - Teleports you to the last Loc" : "!tp (css_tp) - Teleports you to the last Checkpoint")}");
+                player.PrintToChat($"{msgPrefix}{(currentMapName.Contains("surf_") ? "!prevloc (css_prevloc) - Teleports you one Loc back" : "!prevcp (css_prevcp) - Teleports you one Checkpoint back")}");
+                player.PrintToChat($"{msgPrefix}{(currentMapName.Contains("surf_") ? "!nextloc (css_nextloc) - Teleports you one Loc forward" : "!nextcp (css_nextcp) - Teleports you one Checkpoint forward")}");
             }
         }
 
