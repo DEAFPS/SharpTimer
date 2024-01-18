@@ -1157,6 +1157,7 @@ namespace SharpTimer
 
                     if (!records.ContainsKey(steamId) || records[steamId].TimerTicks > timerTicks)
                     {
+                        if (!useMySQL) _ = PrintMapTimeToChat(player, records[steamId].TimerTicks, timerTicks, bonusX);
                         records[steamId] = new PlayerRecord
                         {
                             PlayerName = playerName,
@@ -1168,7 +1169,10 @@ namespace SharpTimer
                         if ((stageTriggerCount != 0 || cpTriggerCount != 0) && bonusX == 0) DumpPlayerStageTimesToJson(player);
                         if (enableReplays == true && useMySQL == false) DumpReplayToJson(player, bonusX);
                     }
-                    if (!useMySQL) _ = PrintMapTimeToChat(player, records[steamId].TimerTicks, timerTicks, bonusX);
+                    else
+                    {
+                        if (!useMySQL) _ = PrintMapTimeToChat(player, records[steamId].TimerTicks, timerTicks, bonusX);
+                    }
                 }
             }
             catch (Exception ex)
@@ -1186,7 +1190,7 @@ namespace SharpTimer
 
             Server.NextFrame(() =>
             {
-                Server.PrintToChatAll(msgPrefix + $"{primaryChatColor}{player.PlayerName} {ChatColors.White}just finished the {(bonusX != 0 ? $" Bonus {bonusX}" : "map")} " +
+                Server.PrintToChatAll(msgPrefix + $"{primaryChatColor}{player.PlayerName} {ChatColors.White} finished the {(bonusX != 0 ? $" Bonus {bonusX}" : "map")} " +
                                                     $"in: {primaryChatColor}[{FormatTime(newticks)}]{ChatColors.White}! {timeDifference}" +
                                                     $"{(bonusX != 0 ? $"" : $"{((oldticks > newticks) && oldticks != 0 ? $"[{primaryChatColor}{ranking}{ChatColors.White}]" : "")}")}");
                 if (playerTimers[player.Slot].SoundsEnabled != false) player.ExecuteClientCommand($"play {beepSound}");
