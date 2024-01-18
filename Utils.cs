@@ -609,24 +609,8 @@ namespace SharpTimer
             UpdateEntityCache();
 
             SortedCachedRecords = GetSortedRecords();
-
-            currentMapStartC1 = new Vector(0, 0, 0);
-            currentMapStartC2 = new Vector(0, 0, 0);
-            currentMapEndC1 = new Vector(0, 0, 0);
-            currentMapEndC2 = new Vector(0, 0, 0);
-
-            currentRespawnPos = null;
-            currentRespawnAng = null;
             
-            currentMapStartTriggerMaxs = null;
-            currentMapStartTriggerMins = null;
-            
-            currentMapTier = null; //making sure previous map tier and type are wiped
-            currentMapType = null;
-            currentMapOverrideDisableTelehop = new string[0]; //making sure previous map overrides are reset
-            currentMapOverrideMaxSpeedLimit = new string[0];
-            currentMapOverrideStageRequirement = false;
-            currentMapOverrideTriggerPushFix = false;
+            ClearMapData();
 
             _ = GetMapInfo();
 
@@ -682,7 +666,7 @@ namespace SharpTimer
                             }
                         }
 
-                        if (mapInfo.OverrideDisableTelehop != null && mapInfo.OverrideDisableTelehop.Any())
+                        /* if (mapInfo.OverrideDisableTelehop != null && mapInfo.OverrideDisableTelehop.Any())
                         {
                             try
                             {
@@ -706,6 +690,23 @@ namespace SharpTimer
                         else
                         {
                             currentMapOverrideDisableTelehop = new string[0];
+                        } */
+
+                        if (!string.IsNullOrEmpty(mapInfo.OverrideDisableTelehop))
+                        {
+                            try
+                            {
+                                currentMapOverrideDisableTelehop = bool.Parse(mapInfo.OverrideDisableTelehop);
+                                SharpTimerConPrint($"Overriding OverrideDisableTelehop...");
+                            }
+                            catch (FormatException)
+                            {
+                                SharpTimerError("Invalid boolean string format for OverrideDisableTelehop");
+                            }
+                        }
+                        else
+                        {
+                            currentMapOverrideStageRequirement = false;
                         }
 
                         if (mapInfo.OverrideMaxSpeedLimit != null && mapInfo.OverrideMaxSpeedLimit.Any())
@@ -824,6 +825,35 @@ namespace SharpTimer
             }
 
             if (triggerPushFixEnabled == true && currentMapOverrideTriggerPushFix == false) FindTriggerPushData();
+        }
+
+        public void ClearMapData()
+        {
+            cpTriggers.Clear();
+            stageTriggers.Clear();
+            stageTriggerAngs.Clear();
+            stageTriggerPoses.Clear();
+
+            stageTriggerCount = 0;
+            useStageTriggers = false;
+            
+            currentMapStartC1 = new Vector(0, 0, 0);
+            currentMapStartC2 = new Vector(0, 0, 0);
+            currentMapEndC1 = new Vector(0, 0, 0);
+            currentMapEndC2 = new Vector(0, 0, 0);
+
+            currentRespawnPos = null;
+            currentRespawnAng = null;
+            
+            currentMapStartTriggerMaxs = null;
+            currentMapStartTriggerMins = null;
+            
+            currentMapTier = null; //making sure previous map tier and type are wiped
+            currentMapType = null;
+            currentMapOverrideDisableTelehop = false; //making sure previous map overrides are reset
+            currentMapOverrideMaxSpeedLimit = new string[0];
+            currentMapOverrideStageRequirement = false;
+            currentMapOverrideTriggerPushFix = false;
         }
 
         private JsonDocument LoadJson(string path)

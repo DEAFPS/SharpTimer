@@ -43,7 +43,7 @@ namespace SharpTimer
         public Vector currentMapEndC2 = new Vector(0, 0, 0);
         public Vector? currentRespawnPos = null;
         public QAngle? currentRespawnAng = null;
-        public string[]? currentMapOverrideDisableTelehop = null;
+        public bool currentMapOverrideDisableTelehop = false;
         public string[]? currentMapOverrideMaxSpeedLimit = null;
         public bool currentMapOverrideStageRequirement = false;
         public bool currentMapOverrideTriggerPushFix = false;
@@ -62,7 +62,8 @@ namespace SharpTimer
 
         public bool enableDebug = true;
         public bool useMySQL = false;
-        public bool enableReplays = true;
+        public bool enableReplays = false;
+        public bool globalRankeEnabled = false;
 
         public bool useTriggers = true;
         public bool respawnEnabled = true;

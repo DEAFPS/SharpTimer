@@ -314,7 +314,12 @@ namespace SharpTimer
                     if (IsAllowedPlayer(player) && resetTriggerTeleportSpeedEnabled && currentMapOverrideDisableTelehop != null)
                     {
                         string triggerName = caller.Entity.Name.ToString();
-                        if (!currentMapOverrideDisableTelehop.Contains(triggerName))
+                        /* if (!currentMapOverrideDisableTelehop.Contains(triggerName))
+                        {
+                            Action<CCSPlayerController?, float, bool> adjustVelocity = use2DSpeed ? AdjustPlayerVelocity2D : AdjustPlayerVelocity;
+                            adjustVelocity(player, 0, false);
+                        } */
+                        if (!currentMapOverrideDisableTelehop)
                         {
                             Action<CCSPlayerController?, float, bool> adjustVelocity = use2DSpeed ? AdjustPlayerVelocity2D : AdjustPlayerVelocity;
                             adjustVelocity(player, 0, false);

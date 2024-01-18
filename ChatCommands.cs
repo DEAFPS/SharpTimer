@@ -599,6 +599,24 @@ namespace SharpTimer
             _ = PrintTopRecordsHandler(player);
         }
 
+        [ConsoleCommand("css_points", "Prints top points")]
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void PrintTopPoints(CCSPlayerController? player, CommandInfo command)
+        {
+            if (!IsAllowedPlayer(player) || globalRankeEnabled == false) return;
+            SharpTimerDebug($"{player.PlayerName} calling css_points...");
+
+            if (playerTimers[player.Slot].TicksSinceLastCmd < cmdCooldown)
+            {
+                player.PrintToChat(msgPrefix + $" Command is on cooldown. Chill...");
+                return;
+            }
+
+            playerTimers[player.Slot].TicksSinceLastCmd = 0;
+
+            _ = PrintTop10PlayerPoints(player);
+        }
+
         [ConsoleCommand("css_topbonus", "Prints top players of this map bonus")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
         public void PrintTopBonusRecords(CCSPlayerController? player, CommandInfo command)

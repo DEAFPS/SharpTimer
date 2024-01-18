@@ -33,6 +33,24 @@ namespace SharpTimer
             autosetHostname = bool.TryParse(args, out bool autosetHostnameValue) ? autosetHostnameValue : args != "0" && autosetHostname;
         }
 
+        [ConsoleCommand("sharptimer_global_ranks_enabled", "Whether the plugin should reward players with global points for compleating maps. Default value: false")]
+        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
+        public void SharpTimerGlobalRanksConvar(CCSPlayerController? player, CommandInfo command)
+        {
+            string args = command.ArgString;
+
+            globalRankeEnabled = bool.TryParse(args, out bool globalRankeEnabledValue) ? globalRankeEnabledValue : args != "0" && globalRankeEnabled;
+        }
+
+        [ConsoleCommand("sharptimer_replays_enabled", "Whether replays should be enabled or not. This option might be performance taxing and use more ram & cpu. Default value: false")]
+        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
+        public void SharpTimerReplayConvar(CCSPlayerController? player, CommandInfo command)
+        {
+            string args = command.ArgString;
+
+            enableReplays = bool.TryParse(args, out bool enableReplaysValue) ? enableReplaysValue : args != "0" && enableReplays;
+        }
+
         [ConsoleCommand("sharptimer_debug_enabled", "Default value: false")]
         [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
         public void SharpTimerConPrintConvar(CCSPlayerController? player, CommandInfo command)
