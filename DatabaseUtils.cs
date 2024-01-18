@@ -294,7 +294,7 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@FormattedTime", dBFormattedTime);
                                 upsertCommand.Parameters.AddWithValue("@UnixStamp", dBunixStamp);
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
-                                if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(player, steamId, playerName, playerSlot, playerPoints);
+                                if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(steamId, playerName, playerSlot, playerPoints);
                                 await upsertCommand.ExecuteNonQueryAsync();
                                 Server.NextFrame(() => SharpTimerDebug($"Saved player {(bonusX != 0 ? $"bonus {bonusX} time" : "time")} to MySQL for {playerName} {timerTicks} {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"));
                             }
@@ -316,7 +316,7 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@UnixStamp", timeNowUnix);
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
                                 await upsertCommand.ExecuteNonQueryAsync();
-                                if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(player, steamId, playerName, playerSlot, timerTicks);
+                                if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(steamId, playerName, playerSlot, timerTicks);
                                 Server.NextFrame(() => SharpTimerDebug($"Saved player {(bonusX != 0 ? $"bonus {bonusX} time" : "time")} to MySQL for {playerName} {timerTicks} {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"));
                             }
                         }
@@ -539,10 +539,8 @@ namespace SharpTimer
             }
         }
 
-        public async Task SavePlayerPoints(CCSPlayerController? player, string steamId, string playerName, int playerSlot, int timerTicks)
+        public async Task SavePlayerPoints(string steamId, string playerName, int playerSlot, int timerTicks)
         {
-            if (player == null || !player.IsValid || player.IsBot) return;
-            if (!(connectedPlayers.ContainsKey(playerSlot) && playerTimers.ContainsKey(playerSlot))) return;
 
             SharpTimerDebug($"Trying to set player points to MySQL for {playerName}");
             try
@@ -562,7 +560,6 @@ namespace SharpTimer
                 using (var connection = await OpenDatabaseConnectionAsync())
                 {
                     await CreatePlayerRecordsTableAsync(connection);
-
 
                     //string selectQuery = "SELECT PlayerName, TimesConnected, LastConnected, HideTimerHud, HideKeys, SoundsEnabled, IsVip, BigGifID FROM PlayerStats WHERE SteamID = @SteamID";
                     string selectQuery = "SELECT PlayerName, TimesConnected, LastConnected, HideTimerHud, HideKeys, SoundsEnabled, IsVip, BigGifID, GlobalPoints FROM PlayerStats WHERE SteamID = @SteamID";
@@ -652,6 +649,7 @@ namespace SharpTimer
 
         public async Task PrintTop10PlayerPoints(CCSPlayerController player)
         {
+            int rank = 0;
             try
             {
                 using (var connection = await OpenDatabaseConnectionAsync())
@@ -664,8 +662,6 @@ namespace SharpTimer
                             using (MySqlDataReader reader = await command.ExecuteReaderAsync())
                             {
                                 Server.NextFrame(() => player.PrintToChat(msgPrefix + $"Top 10 Players with the most points:"));
-
-                                int rank = 1;
 
                                 while (await reader.ReadAsync())
                                 {
