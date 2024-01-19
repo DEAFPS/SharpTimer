@@ -419,7 +419,7 @@ namespace SharpTimer
                             {
                                 upsertCommand.Parameters.AddWithValue("@PlayerName", playerName);
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
-                                upsertCommand.Parameters.AddWithValue("@TimesConnected", timesConnected);
+                                upsertCommand.Parameters.AddWithValue("@TimesConnected", 1);
                                 upsertCommand.Parameters.AddWithValue("@LastConnected", lastConnected);
                                 upsertCommand.Parameters.AddWithValue("@HideTimerHud", false);
                                 upsertCommand.Parameters.AddWithValue("@HideKeys", false);
@@ -649,9 +649,9 @@ namespace SharpTimer
 
         public async Task PrintTop10PlayerPoints(CCSPlayerController player)
         {
-            int rank = 0;
             try
             {
+                int rank = 0;
                 using (var connection = await OpenDatabaseConnectionAsync())
                 {
                     try
@@ -665,7 +665,7 @@ namespace SharpTimer
 
                                 while (await reader.ReadAsync())
                                 {
-                                    string playerName = reader["playername"].ToString();
+                                    string playerName = reader["PlayerName"].ToString();
                                     int points = Convert.ToInt32(reader["GlobalPoints"]);
                                     rank++;
 
@@ -876,17 +876,6 @@ namespace SharpTimer
                 }
             }
             return new Dictionary<string, PlayerRecord>();
-        }
-
-        public void SavePlayerSettingToDatabase(string SteamID, string setting, bool state)
-        {
-
-        }
-
-        public bool GetPlayerSettingFromDatabase(string SteamID, string setting)
-        {
-
-            return false;
         }
 
         [ConsoleCommand("css_jsontodatabase", " ")]

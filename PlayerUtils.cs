@@ -407,6 +407,7 @@ namespace SharpTimer
             if (topEnabled)                                 player.PrintToChat($"{msgPrefix}!top (css_top) - Lists top 10 records on this map");
             if (topEnabled && bonusRespawnPoses.Any())      player.PrintToChat($"{msgPrefix}!topbonus <#> (css_topbonus) - Lists top 10 records of a bonus");
             if (rankEnabled)                                player.PrintToChat($"{msgPrefix}!rank (css_rank) - Shows your current rank and pb");
+            if (globalRankeEnabled)                         player.PrintToChat($"{msgPrefix}!points (css_points) - Prints top 10 points");
             if (goToEnabled)                                player.PrintToChat($"{msgPrefix}!goto <name> (css_goto) - Teleports you to a player");
             if (stageTriggerPoses.Any())                    player.PrintToChat($"{msgPrefix}!stage <#> (css_goto) - Teleports you to a stage");
 
