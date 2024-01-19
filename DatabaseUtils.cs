@@ -651,7 +651,6 @@ namespace SharpTimer
         {
             try
             {
-                int rank = 0;
                 using (var connection = await OpenDatabaseConnectionAsync())
                 {
                     try
@@ -663,13 +662,15 @@ namespace SharpTimer
                             {
                                 Server.NextFrame(() => player.PrintToChat(msgPrefix + $"Top 10 Players with the most points:"));
 
+                                int rank = 0;
+
                                 while (await reader.ReadAsync())
                                 {
                                     string playerName = reader["PlayerName"].ToString();
                                     int points = Convert.ToInt32(reader["GlobalPoints"]);
-                                    rank++;
+                                    int currentRank = ++rank;
 
-                                    Server.NextFrame(() => player.PrintToChat(msgPrefix + $"#{rank}: {primaryChatColor}{playerName}{ChatColors.Default}: {primaryChatColor}{points}{ChatColors.Default} points"));
+                                    Server.NextFrame(() => player.PrintToChat(msgPrefix + $"#{currentRank}: {primaryChatColor}{playerName}{ChatColors.Default}: {primaryChatColor}{points}{ChatColors.Default} points"));
                                 }
                             }
                         }
