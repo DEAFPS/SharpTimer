@@ -60,6 +60,24 @@ namespace SharpTimer
             killServerCommands = bool.TryParse(args, out bool killServerCommandsValue) ? killServerCommandsValue : args != "0" && killServerCommands;
         }
 
+        [ConsoleCommand("sharptimer_enable_timer_hud", "If Timer Hud should be globally enabled or not. Default value: true")]
+        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
+        public void SharpTimerHUDConvar(CCSPlayerController? player, CommandInfo command)
+        {
+            string args = command.ArgString;
+
+            hudOverlayEnabled = bool.TryParse(args, out bool hudOverlayEnabledValue) ? hudOverlayEnabledValue : args != "0" && hudOverlayEnabled;
+        }
+
+        [ConsoleCommand("sharptimer_enable_keys_hud", "If Keys Hud should be globally enabled or not. Default value: true")]
+        [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
+        public void SharpTimerPointKeysHUDConvar(CCSPlayerController? player, CommandInfo command)
+        {
+            string args = command.ArgString;
+
+            keysOverlayEnabled = bool.TryParse(args, out bool keysOverlayEnabledValue) ? keysOverlayEnabledValue : args != "0" && keysOverlayEnabled;
+        }
+
         [ConsoleCommand("sharptimer_debug_enabled", "Default value: false")]
         [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
         public void SharpTimerConPrintConvar(CCSPlayerController? player, CommandInfo command)

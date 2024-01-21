@@ -216,12 +216,12 @@ namespace SharpTimer
                         Userid = player
                     };
 
-                    if (playerTimer.HideTimerHud != true)
+                    if (playerTimer.HideTimerHud != true && hudOverlayEnabled == true)
                     {
                         @event.FireEvent(false);
                     }
 
-                    if (playerTimer.HideKeys != true && playerTimer.IsReplaying != true)
+                    if (playerTimer.HideKeys != true && playerTimer.IsReplaying != true && keysOverlayEnabled == true)
                     {
                         player.PrintToCenter(keysLineNoHtml);
                     }
@@ -361,11 +361,11 @@ namespace SharpTimer
                     string hudContent = timerLine +
                                         veloLine +
                                         infoLine +
-                                        keysLine +
+                                        (keysOverlayEnabled == true ? keysLine : "") +
                                         ((playerTimer.IsTester && !isTimerRunning && !playerTimer.IsBonusTimerRunning && !playerTimer.IsReplaying) ? playerTimer.TesterPausedGif : "") +
                                         ((playerTimer.IsVip && !playerTimer.IsTester && !isTimerRunning && !playerTimer.IsBonusTimerRunning && !playerTimer.IsReplaying) ? $"<br><img src='https://i.imgur.com/{playerTimer.VipPausedGif}.gif'><br>" : "");
 
-                    if (playerTimer.HideTimerHud != true)
+                    if (playerTimer.HideTimerHud != true && hudOverlayEnabled == true)
                     {
                         var @event = new EventShowSurvivalRespawnStatus(false)
                         {

@@ -67,7 +67,7 @@ namespace SharpTimer
                                 $"{((replayFrame.Buttons & PlayerButtons.Jump) != 0 ? "J" : "_")} " +
                                 $"{((replayFrame.Buttons & PlayerButtons.Duck) != 0 ? "C" : "_")}";
 
-            if (playerTimers[player.Slot].HideKeys != true && playerTimers[player.Slot].IsReplaying == true)
+            if (playerTimers[player.Slot].HideKeys != true && playerTimers[player.Slot].IsReplaying == true && keysOverlayEnabled == true)
             {
                 player.PrintToCenter(replayButtons);
             }
