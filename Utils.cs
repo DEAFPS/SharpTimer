@@ -586,6 +586,17 @@ namespace SharpTimer
                 stageTriggerPoses.Clear();
 
                 _ = CheckTablesAsync();
+
+                if (killServerCommands == true)
+                {
+                    var pointServerCommands = Utilities.FindAllEntitiesByDesignerName<CTriggerPush>("point_servercommand");
+
+                    foreach(var servercmd in pointServerCommands)
+                    {
+                        if(servercmd == null) continue;
+                        servercmd.Remove();
+                    }
+                }
             });
         }
 

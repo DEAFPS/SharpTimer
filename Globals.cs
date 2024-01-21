@@ -61,6 +61,7 @@ namespace SharpTimer
         public int? currentMapTier = null;
 
         public bool enableDebug = true;
+        public bool killServerCommands = true;
         public bool useMySQL = false;
         public bool enableReplays = false;
         public bool globalRankeEnabled = false;
