@@ -589,7 +589,7 @@ namespace SharpTimer
 
                 if (killServerCommands == true)
                 {
-                    var pointServerCommands = Utilities.FindAllEntitiesByDesignerName<CTriggerPush>("point_servercommand");
+                    var pointServerCommands = Utilities.FindAllEntitiesByDesignerName<CPointServerCommand>("point_servercommand");
 
                     foreach(var servercmd in pointServerCommands)
                     {
