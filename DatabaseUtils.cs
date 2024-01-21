@@ -597,9 +597,9 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
                                 upsertCommand.Parameters.AddWithValue("@TimesConnected", timesConnected);
                                 upsertCommand.Parameters.AddWithValue("@LastConnected", lastConnected);
-                                upsertCommand.Parameters.AddWithValue("@HideTimerHud", playerTimers[playerSlot].HideTimerHud);
-                                upsertCommand.Parameters.AddWithValue("@HideKeys", playerTimers[playerSlot].HideKeys);
-                                upsertCommand.Parameters.AddWithValue("@SoundsEnabled", playerTimers[playerSlot].SoundsEnabled);
+                                upsertCommand.Parameters.AddWithValue("@HideTimerHud", playerSlot == -1 ? false : playerTimers[playerSlot].HideTimerHud);
+                                upsertCommand.Parameters.AddWithValue("@HideKeys", playerSlot == -1 ? false : playerTimers[playerSlot].HideKeys);
+                                upsertCommand.Parameters.AddWithValue("@SoundsEnabled", playerSlot == -1 ? false : playerTimers[playerSlot].SoundsEnabled);
                                 upsertCommand.Parameters.AddWithValue("@IsVip", isVip);
                                 upsertCommand.Parameters.AddWithValue("@BigGifID", bigGif);
                                 upsertCommand.Parameters.AddWithValue("@GlobalPoints", newPoints);
@@ -626,9 +626,9 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
                                 upsertCommand.Parameters.AddWithValue("@TimesConnected", 1);
                                 upsertCommand.Parameters.AddWithValue("@LastConnected", timeNowUnix);
-                                upsertCommand.Parameters.AddWithValue("@HideTimerHud", playerTimers[playerSlot].HideTimerHud);
-                                upsertCommand.Parameters.AddWithValue("@HideKeys", playerTimers[playerSlot].HideKeys);
-                                upsertCommand.Parameters.AddWithValue("@SoundsEnabled", playerTimers[playerSlot].SoundsEnabled);
+                                upsertCommand.Parameters.AddWithValue("@HideTimerHud", playerSlot == -1 ? false : playerTimers[playerSlot].HideTimerHud);
+                                upsertCommand.Parameters.AddWithValue("@HideKeys", playerSlot == -1 ? false : playerTimers[playerSlot].HideKeys);
+                                upsertCommand.Parameters.AddWithValue("@SoundsEnabled", playerSlot == -1 ? false : playerTimers[playerSlot].SoundsEnabled);
                                 upsertCommand.Parameters.AddWithValue("@IsVip", false);
                                 upsertCommand.Parameters.AddWithValue("@BigGifID", "x");
                                 upsertCommand.Parameters.AddWithValue("@GlobalPoints", newPoints);
@@ -877,6 +877,39 @@ namespace SharpTimer
                 }
             }
             return new Dictionary<string, PlayerRecord>();
+        }
+
+        [ConsoleCommand("css_importpoints", " ")]
+        [RequiresPermissions("@css/root")]
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
+        public void ImportPlayerPointsCommand(CCSPlayerController? player, CommandInfo command)
+        {
+            _ = ImportPlayerPoints();
+        }
+
+        public async Task ImportPlayerPoints()
+        {
+            try
+            {
+                var sortedRecords = await GetSortedRecordsFromDatabase();
+
+                foreach (var kvp in sortedRecords)
+                {
+                    string playerSteamID = kvp.Key;
+                    string playerName = kvp.Value.PlayerName;
+                    int timerTicks = kvp.Value.TimerTicks;
+
+                    if (useMySQL == true && globalRankeEnabled == true)
+                    {
+                        _ = SavePlayerPoints(playerSteamID, playerName, -1, timerTicks);
+                        await Task.Delay(100);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SharpTimerError($"Error ImportPlayerPoints to the database: {ex.Message}");
+            }
         }
 
         [ConsoleCommand("css_jsontodatabase", " ")]
