@@ -238,6 +238,7 @@ namespace SharpTimer
                 // store new value separatley
                 int new_dBtimerTicks = 0;
                 int playerPoints = 0;
+                bool beatPB = false;
 
                 using (var connection = await OpenDatabaseConnectionAsync())
                 {
@@ -271,14 +272,16 @@ namespace SharpTimer
                                 new_dBtimerTicks = timerTicks;
                                 dBunixStamp = timeNowUnix;
                                 dBFormattedTime = formattedTime;
-                                playerPoints = dBtimerTicks - timerTicks;
-                                if (playerPoints < 32) playerPoints = 32;
+                                playerPoints = timerTicks;
+                                beatPB = true;
+                                if (playerPoints < 32) playerPoints = 320000;
                                 if (enableReplays == true && useMySQL == true) DumpReplayToJson(player, bonusX);
                             }
                             else
                             {
                                 new_dBtimerTicks = dBtimerTicks;
-                                playerPoints = 32;
+                                beatPB = false;
+                                playerPoints = 320000;
                             }
 
                             await row.CloseAsync();
@@ -294,7 +297,7 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@FormattedTime", dBFormattedTime);
                                 upsertCommand.Parameters.AddWithValue("@UnixStamp", dBunixStamp);
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
-                                if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(steamId, playerName, playerSlot, playerPoints);
+                                if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(steamId, playerName, playerSlot, playerPoints, beatPB);
                                 await upsertCommand.ExecuteNonQueryAsync();
                                 Server.NextFrame(() => SharpTimerDebug($"Saved player {(bonusX != 0 ? $"bonus {bonusX} time" : "time")} to MySQL for {playerName} {timerTicks} {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"));
                             }
@@ -316,7 +319,7 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@UnixStamp", timeNowUnix);
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
                                 await upsertCommand.ExecuteNonQueryAsync();
-                                if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(steamId, playerName, playerSlot, timerTicks);
+                                if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(steamId, playerName, playerSlot, timerTicks, beatPB);
                                 Server.NextFrame(() => SharpTimerDebug($"Saved player {(bonusX != 0 ? $"bonus {bonusX} time" : "time")} to MySQL for {playerName} {timerTicks} {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"));
                             }
                         }
@@ -539,7 +542,7 @@ namespace SharpTimer
             }
         }
 
-        public async Task SavePlayerPoints(string steamId, string playerName, int playerSlot, int timerTicks)
+        public async Task SavePlayerPoints(string steamId, string playerName, int playerSlot, int timerTicks, bool beatPB = false)
         {
 
             SharpTimerDebug($"Trying to set player points to MySQL for {playerName}");
@@ -582,9 +585,7 @@ namespace SharpTimer
                             playerPoints = row.GetInt32("GlobalPoints");
 
                             // Modify the stats
-                            if (currentMapTier != null) mapTier = ((float)(currentMapTier * 0.1f));
-                            float calcPoints = 230400.0f - (230400.0f - timerTicks);
-                            int newPoints = Convert.ToInt32(calcPoints + playerPoints);
+                            int newPoints = beatPB == false ? Convert.ToInt32(CalculatePoints(timerTicks)) + playerPoints : Convert.ToInt32(CalculatePBPoints(timerTicks)) + playerPoints;
 
                             await row.CloseAsync();
                             // Update or insert the record
@@ -605,7 +606,7 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@GlobalPoints", newPoints);
 
                                 await upsertCommand.ExecuteNonQueryAsync();
-                                Server.NextFrame(() => Server.PrintToChatAll(msgPrefix + $"{primaryChatColor}{playerName}{ChatColors.Default} gained {ChatColors.Green}+{Convert.ToInt32(calcPoints)}{ChatColors.Default} Points {ChatColors.Grey}({newPoints})"));
+                                Server.NextFrame(() => Server.PrintToChatAll(msgPrefix + $"{primaryChatColor}{playerName}{ChatColors.Default} gained {ChatColors.Green}+{Convert.ToInt32(newPoints - playerPoints)}{ChatColors.Default} Points {ChatColors.Grey}({newPoints})"));
                                 Server.NextFrame(() => SharpTimerDebug($"Set points in MySQL for {playerName} from {playerPoints} to {newPoints}"));
                             }
                         }
@@ -613,9 +614,7 @@ namespace SharpTimer
                         {
                             Server.NextFrame(() => SharpTimerDebug($"No player stats yet"));
 
-                            if (currentMapTier != null) mapTier = ((float)(currentMapTier * 0.1f));
-                            float calcPoints = 230400.0f - (230400.0f - timerTicks);
-                            int newPoints = Convert.ToInt32(calcPoints + playerPoints);
+                            int newPoints = beatPB == false ? Convert.ToInt32(CalculatePoints(timerTicks)) + playerPoints : Convert.ToInt32(CalculatePBPoints(timerTicks)) + playerPoints;
 
                             await row.CloseAsync();
 
@@ -634,7 +633,7 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@GlobalPoints", newPoints);
 
                                 await upsertCommand.ExecuteNonQueryAsync();
-                                Server.NextFrame(() => Server.PrintToChatAll(msgPrefix + $"{primaryChatColor}{playerName}{ChatColors.Default} gained {ChatColors.Green}+{Convert.ToInt32(calcPoints)}{ChatColors.Default} Points {ChatColors.Grey}({newPoints})"));
+                                Server.NextFrame(() => Server.PrintToChatAll(msgPrefix + $"{primaryChatColor}{playerName}{ChatColors.Default} gained {ChatColors.Green}+{Convert.ToInt32(newPoints - playerPoints)}{ChatColors.Default} Points {ChatColors.Grey}({newPoints})"));
                                 Server.NextFrame(() => SharpTimerDebug($"Set points in MySQL for {playerName} from {playerPoints} to {newPoints}"));
                             }
                         }

@@ -117,6 +117,36 @@ namespace SharpTimer
             }
         }
 
+        public double CalculatePoints(int timerTicks)
+        {
+            double basePoints = 10000.0;
+            double timeFactor = 0.0001;
+            double tierMult = 0.1;
+
+            if (currentMapTier != null)
+            {
+                tierMult = (double)(currentMapTier * 0.1);
+            }
+
+            double points = basePoints / (timerTicks * timeFactor);
+            return points * tierMult;
+        }
+
+        public double CalculatePBPoints(int timerTicks)
+        {
+            double basePoints = 10000.0;
+            double timeFactor = 0.01;
+            double tierMult = 0.1;
+
+            if (currentMapTier != null)
+            {
+                tierMult = (double)(currentMapTier * 0.1);
+            }
+
+            double points = basePoints / (timerTicks * timeFactor);
+            return points * tierMult;
+        }
+
         string ParseColorToSymbol(string input)
         {
             Dictionary<string, string> colorNameSymbolMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -591,9 +621,9 @@ namespace SharpTimer
                 {
                     var pointServerCommands = Utilities.FindAllEntitiesByDesignerName<CPointServerCommand>("point_servercommand");
 
-                    foreach(var servercmd in pointServerCommands)
+                    foreach (var servercmd in pointServerCommands)
                     {
-                        if(servercmd == null) continue;
+                        if (servercmd == null) continue;
                         servercmd.Remove();
                     }
                 }
@@ -620,7 +650,7 @@ namespace SharpTimer
             UpdateEntityCache();
 
             SortedCachedRecords = GetSortedRecords();
-            
+
             ClearMapData();
 
             _ = GetMapInfo();
@@ -847,7 +877,7 @@ namespace SharpTimer
 
             stageTriggerCount = 0;
             useStageTriggers = false;
-            
+
             currentMapStartC1 = new Vector(0, 0, 0);
             currentMapStartC2 = new Vector(0, 0, 0);
             currentMapEndC1 = new Vector(0, 0, 0);
@@ -855,10 +885,10 @@ namespace SharpTimer
 
             currentRespawnPos = null;
             currentRespawnAng = null;
-            
+
             currentMapStartTriggerMaxs = null;
             currentMapStartTriggerMins = null;
-            
+
             currentMapTier = null; //making sure previous map tier and type are wiped
             currentMapType = null;
             currentMapOverrideDisableTelehop = false; //making sure previous map overrides are reset
