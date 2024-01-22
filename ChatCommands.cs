@@ -1087,7 +1087,7 @@ namespace SharpTimer
             SharpTimerDebug($"{player.PlayerName} css_timer to {playerTimers[player.Slot].IsTimerBlocked}");
         }
 
-        [ConsoleCommand("css_ver", "Prints SharpTimer Version")]
+        [ConsoleCommand("css_stver", "Prints SharpTimer Version")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_AND_SERVER)]
         public void STVerCommand(CCSPlayerController? player, CommandInfo command)
         {

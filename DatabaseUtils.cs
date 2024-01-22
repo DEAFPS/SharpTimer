@@ -26,7 +26,9 @@ namespace SharpTimer
                                                     "PlayerName VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT ''",
                                                     "TimerTicks INT DEFAULT 0",
                                                     "FormattedTime VARCHAR(255) DEFAULT ''",
-                                                    "UnixStamp INT DEFAULT 0"
+                                                    "UnixStamp INT DEFAULT 0",
+                                                    "LastFinished INT DEFAULT 0",
+                                                    "TimesFinished INT DEFAULT 0"
                                                 };
 
             string[] playerStatsColumns =       {   "SteamID VARCHAR(255) DEFAULT ''",
@@ -45,19 +47,19 @@ namespace SharpTimer
             {
                 try
                 {
-                    //check PlayerRecords
+                    // Check PlayerRecords
                     SharpTimerDebug($"Checking PlayerRecords Table...");
                     await CreatePlayerRecordsTableAsync(connection);
                     await UpdateTableColumnsAsync(connection, "PlayerRecords", playerRecordsColumns);
 
-                    //check PlayerStats
+                    // Check PlayerStats
                     SharpTimerDebug($"Checking PlayerStats Table...");
                     await CreatePlayerStatsTableAsync(connection);
                     await UpdateTableColumnsAsync(connection, "PlayerStats", playerStatsColumns);
                 }
                 catch (Exception ex)
                 {
-                    SharpTimerError($"Error in CheckTablesAsync: {ex.Message}");
+                    SharpTimerError($"Error in CheckTablesAsync: {ex}");
                 }
             }
         }
@@ -298,8 +300,10 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@UnixStamp", dBunixStamp);
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
                                 if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(steamId, playerName, playerSlot, playerPoints, beatPB);
+                                if ((stageTriggerCount != 0 || cpTriggerCount != 0) && bonusX == 0 && useMySQL == true) Server.NextFrame(() => DumpPlayerStageTimesToJson(player));
                                 await upsertCommand.ExecuteNonQueryAsync();
                                 Server.NextFrame(() => SharpTimerDebug($"Saved player {(bonusX != 0 ? $"bonus {bonusX} time" : "time")} to MySQL for {playerName} {timerTicks} {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"));
+                                Server.NextFrame(() => _ = PrintMapTimeToChat(player, dBtimerTicks, timerTicks, bonusX));
                             }
                         }
                         else
@@ -320,14 +324,15 @@ namespace SharpTimer
                                 upsertCommand.Parameters.AddWithValue("@SteamID", steamId);
                                 await upsertCommand.ExecuteNonQueryAsync();
                                 if (useMySQL == true && globalRankeEnabled == true) _ = SavePlayerPoints(steamId, playerName, playerSlot, timerTicks, beatPB);
+                                if ((stageTriggerCount != 0 || cpTriggerCount != 0) && bonusX == 0 && useMySQL == true) Server.NextFrame(() => DumpPlayerStageTimesToJson(player));
                                 Server.NextFrame(() => SharpTimerDebug($"Saved player {(bonusX != 0 ? $"bonus {bonusX} time" : "time")} to MySQL for {playerName} {timerTicks} {DateTimeOffset.UtcNow.ToUnixTimeSeconds()}"));
+                                Server.NextFrame(() => _ = PrintMapTimeToChat(player, dBtimerTicks, timerTicks, bonusX));
                             }
                         }
                     }
                 }
 
-                if (useMySQL == true) _ = RankCommandHandler(player, steamId, playerSlot, playerName, true);
-                Server.NextFrame(() => _ = PrintMapTimeToChat(player, dBtimerTicks, timerTicks, bonusX));
+                if (useMySQL == true) _ = RankCommandHandler(player, steamId, playerSlot, playerName, true);           
             }
             catch (Exception ex)
             {

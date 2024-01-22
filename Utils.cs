@@ -588,6 +588,21 @@ namespace SharpTimer
             };
         }
 
+        private void KillServerCommandEnts()
+        {
+            if (killServerCommands == true)
+            {
+                var pointServerCommands = Utilities.FindAllEntitiesByDesignerName<CPointServerCommand>("point_servercommand");
+
+                foreach (var servercmd in pointServerCommands)
+                {
+                    if (servercmd == null) continue;
+                    SharpTimerDebug($"Killed point_servercommand ent: {servercmd.Handle}");
+                    servercmd.Remove();
+                }
+            }
+        }
+
         private void OnMapStartHandler(string mapName)
         {
             Server.NextFrame(() =>
@@ -617,16 +632,7 @@ namespace SharpTimer
 
                 _ = CheckTablesAsync();
 
-                if (killServerCommands == true)
-                {
-                    var pointServerCommands = Utilities.FindAllEntitiesByDesignerName<CPointServerCommand>("point_servercommand");
-
-                    foreach (var servercmd in pointServerCommands)
-                    {
-                        if (servercmd == null) continue;
-                        servercmd.Remove();
-                    }
-                }
+                KillServerCommandEnts();
             });
         }
 
@@ -866,6 +872,8 @@ namespace SharpTimer
             }
 
             if (triggerPushFixEnabled == true && currentMapOverrideTriggerPushFix == false) FindTriggerPushData();
+
+            KillServerCommandEnts();
         }
 
         public void ClearMapData()
