@@ -1067,6 +1067,49 @@ namespace SharpTimer
             }
         }
 
+        [ConsoleCommand("css_rs", "Teleport player to start of stage.")]
+        [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
+        public void RestartCurrentStageCmd(CCSPlayerController? player, CommandInfo command)
+        {
+            if (!IsAllowedPlayer(player)) return;
+            
+            if (playerTimers[player.Slot].TicksSinceLastCmd < cmdCooldown)
+            {
+                player.PrintToChat(msgPrefix + $" Command is on cooldown. Chill...");
+                return;
+            }
+            
+            SharpTimerDebug($"{player.PlayerName} calling css_rs...");
+            
+            if (!playerTimers.TryGetValue(player.Slot, out PlayerTimerInfo? playerTimer) || playerTimer.CurrentMapStage == 0)
+            {
+                player.PrintToChat(msgPrefix + $" {ChatColors.LightRed} Error occured.");
+                SharpTimerDebug("Failed to get playerTimer or playerTimer.CurrentMapStage == 0.");
+                return;
+            }
+            
+            int currStage = playerTimer.CurrentMapStage;
+            
+            try
+            {
+                playerTimers[player.Slot].TicksSinceLastCmd = 0;
+
+                if (stageTriggerPoses.TryGetValue(currStage, out Vector? stagePos) && stagePos != null)
+                {
+                    player.PlayerPawn.Value!.Teleport(stagePos, stageTriggerAngs[currStage] ?? player.PlayerPawn.Value.EyeAngles, new Vector(0, 0, 0));
+                    SharpTimerDebug($"{player.PlayerName} css_rs {player.PlayerName}");
+                }
+                else
+                {
+                    player.PrintToChat(msgPrefix + $" {ChatColors.LightRed} No RespawnStagePos with index {currStage} found for current map!");
+                }
+            }
+            catch (Exception ex)
+            {
+                SharpTimerError($"Exception in RestartCurrentStage: {ex.Message}");
+            }
+        }
+
         [ConsoleCommand("css_timer", "Stops your timer")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
         public void ForceStopTimer(CCSPlayerController? player, CommandInfo command)
