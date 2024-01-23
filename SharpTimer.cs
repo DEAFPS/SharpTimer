@@ -1,6 +1,7 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
+using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -398,7 +399,49 @@ namespace SharpTimer
                 SharpTimerDebug($"Platform is Windows. Blocking TakeDamage hook");
             }
 
+            //AddCommandListener("say", OnPlayerChat, HookMode.Pre);
+
             SharpTimerDebug("Plugin Loaded");
+        }
+
+        public override void Unload(bool hotReload)
+        {
+            base.Unload(hotReload);
+            RemoveCommandListener("say", OnPlayerChat, HookMode.Pre);
+        }
+
+        private HookResult OnPlayerChat(CCSPlayerController? player, CommandInfo messageInfo)
+        {
+            if(IsAllowedPlayer(player) || IsAllowedSpectator(player))
+            {
+                string rankString = "";
+
+                if(playerTimers[player.Slot].CachedRank.Contains("Unranked"))
+                    rankString = $"{ChatColors.Grey}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Silver"))
+                    rankString = $"{ChatColors.Silver}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Gold"))
+                    rankString = $"{ChatColors.Gold}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Platinum"))
+                    rankString = $"{ChatColors.BlueGrey}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Diamond"))
+                    rankString = $"{ChatColors.LightBlue}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Master"))
+                    rankString = $"{ChatColors.Purple}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Legend"))
+                    rankString = $"{ChatColors.Lime}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Royalty"))
+                    rankString = $"{ChatColors.Orange}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                else if(playerTimers[player.Slot].CachedRank.Contains("God"))
+                    rankString = $"{ChatColors.LightRed}[{playerTimers[player.Slot].CachedRank}]{ChatColors.Default}";
+                
+                Server.PrintToChatAll($"{rankString} {player.PlayerName}: {messageInfo.GetArg(1)}");
+                return HookResult.Handled;
+            }
+            else
+            {
+                return HookResult.Handled;
+            }           
         }
     }
 }

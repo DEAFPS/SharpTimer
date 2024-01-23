@@ -30,11 +30,11 @@ namespace SharpTimer
                 Console.WriteLine($"  IsRecordingReplay: {kvp.Value.IsRecordingReplay}");
 
                 Console.WriteLine($"  ReplayHUDString: {kvp.Value.ReplayHUDString}");
-                Console.WriteLine($"  RankHUDString: {kvp.Value.RankHUDString}");
+                Console.WriteLine($"  RankHUDString: {kvp.Value.RankHUDIcon}");
                 Console.WriteLine($"  IsRankPbCached: {kvp.Value.IsRankPbCached}");
                 Console.WriteLine($"  IsSpecTargetCached: {kvp.Value.IsSpecTargetCached}");
                 Console.WriteLine($"  PreSpeed: {kvp.Value.PreSpeed}");
-                Console.WriteLine($"  PB: {kvp.Value.PB}");
+                Console.WriteLine($"  PB: {kvp.Value.CachedPB}");
 
                 Console.WriteLine($"  TicksInAir: {kvp.Value.TicksInAir}");
                 Console.WriteLine($"  CheckpointIndex: {kvp.Value.CheckpointIndex}");
@@ -121,7 +121,7 @@ namespace SharpTimer
             ReadReplayFromJson(player, player.SteamID.ToString());
 
             playerTimers[player.Slot].IsReplaying = playerTimers[player.Slot].IsReplaying ? false : true;
-            playerTimers[player.Slot].ReplayHUDString = $"{player.PlayerName} | {playerTimers[player.Slot].PB}";
+            playerTimers[player.Slot].ReplayHUDString = $"{player.PlayerName} | {playerTimers[player.Slot].CachedPB}";
 
             playerTimers[player.Slot].IsTimerRunning = false;
             playerTimers[player.Slot].TimerTicks = 0;
@@ -703,8 +703,10 @@ namespace SharpTimer
         {
             if (!IsAllowedPlayer(player)) return;
             SharpTimerDebug($"Handling !rank for {playerName}...");
-            string ranking = await GetPlayerPlacementWithTotal(player, steamId, playerName);
-            string rankIcon = await GetPlayerPlacementWithTotal(player, steamId, playerName, true);
+
+            string ranking = (useMySQL && globalRankeEnabled) ? await GetPlayerServerPlacement(player, steamId, playerName) : await GetPlayerMapPlacementWithTotal(player, steamId, playerName);
+            string rankIcon = (useMySQL && globalRankeEnabled) ? await GetPlayerServerPlacement(player, steamId, playerName, true) : await GetPlayerMapPlacementWithTotal(player, steamId, playerName, true);
+            string mapPlacement = await GetPlayerMapPlacementWithTotal(player, steamId, playerName, false, true);
 
             int pbTicks;
             if (useMySQL == false)
@@ -716,17 +718,34 @@ namespace SharpTimer
                 pbTicks = await GetPreviousPlayerRecordFromDatabase(player, steamId, currentMapName, playerName);
             }
 
-            string rankHUDstring = $" {(!string.IsNullOrEmpty(rankIcon) ? $" {rankIcon}" : "")}" +
-                       $"<font class='fontSize-s' color='gray'>" +
-                       $"{((!string.IsNullOrEmpty(ranking) && string.IsNullOrEmpty(rankIcon)) ? $" {ranking}" : "")}" +
-                       $"{((!string.IsNullOrEmpty(ranking) && !string.IsNullOrEmpty(rankIcon)) ? " | " + ranking : "")}" +
-                       $"{(pbTicks != 0 ? $" | {FormatTime(pbTicks)}" : "")}";
-
             Server.NextFrame(() =>
             {
                 if (!IsAllowedPlayer(player)) return;
-                playerTimers[playerSlot].RankHUDString = rankHUDstring;
-                playerTimers[playerSlot].PB = FormatTime(pbTicks);
+                playerTimers[playerSlot].RankHUDIcon = $"{(!string.IsNullOrEmpty(rankIcon) ? $" {rankIcon}" : "")}";
+                playerTimers[playerSlot].CachedPB = $"{(pbTicks != 0 ? $" {FormatTime(pbTicks)}" : "n/a")}";
+                playerTimers[playerSlot].CachedRank = ranking;
+                playerTimers[playerSlot].CachedMapPlacement = mapPlacement;
+
+                //update player username
+                
+                /* if(playerTimers[player.Slot].CachedRank.Contains("Unranked"))
+                    nameTagRank = $" \x01[{playerTimers[player.Slot].CachedRank}]\x01";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Silver"))
+                    nameTagRank = $" \x0A[{playerTimers[player.Slot].CachedRank}]\x01";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Gold"))
+                    nameTagRank = $" \x10[{playerTimers[player.Slot].CachedRank}]\x01";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Platinum"))
+                    nameTagRank = $" \x0A[{playerTimers[player.Slot].CachedRank}]\x01";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Diamond"))
+                    nameTagRank = $" \x0B[{playerTimers[player.Slot].CachedRank}]\x01";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Master"))
+                    nameTagRank = $" \x03[{playerTimers[player.Slot].CachedRank}]\x01";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Legend"))
+                    nameTagRank = $" \x06[{playerTimers[player.Slot].CachedRank}]\x01";
+                else if(playerTimers[player.Slot].CachedRank.Contains("Royalty"))
+                    nameTagRank = $" \x10[{playerTimers[player.Slot].CachedRank}]\x01";
+                else if(playerTimers[player.Slot].CachedRank.Contains("God"))
+                    nameTagRank = $" \x0F[{playerTimers[player.Slot].CachedRank}]\x01"; */
             });
 
             if (sendRankToHUD == false)
@@ -735,7 +754,7 @@ namespace SharpTimer
                 {
                     if (!IsAllowedPlayer(player)) return;
                     player.PrintToChat(msgPrefix + $" You are currently {primaryChatColor}{ranking}");
-                    if (pbTicks != 0) player.PrintToChat(msgPrefix + $" Your current PB: {primaryChatColor}{FormatTime(pbTicks)}");
+                    if (pbTicks != 0) player.PrintToChat(msgPrefix + $" Your current PB on {primaryChatColor}{currentMapName}{ChatColors.Default}: {primaryChatColor}{FormatTime(pbTicks)}");
                 });
             }
         }

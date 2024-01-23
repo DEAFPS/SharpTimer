@@ -187,10 +187,10 @@ namespace SharpTimer
                     //string veloLine = $" {(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")}<font class='fontSize-s' color='{tertiaryHUDcolor}'>Speed:</font> <font class='fontSize-l' color='{secondaryHUDcolor}'>{formattedPlayerVel}</font> <font class='fontSize-s' color='gray'>({formattedPlayerPre})</font>{(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")} <br>";
                     string veloLine = $" {(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")}<font class='fontSize-s' color='{tertiaryHUDcolor}'>Speed:</font> {(playerTimer.IsReplaying ? "<font class=''" : "<font class='fontSize-l'")} color='{secondaryHUDcolor}'>{formattedPlayerVel}</font> <font class='fontSize-s' color='gray'>({formattedPlayerPre})</font>{(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")} <br>";
                     string infoLine = !playerTimer.IsReplaying
-                                        ? $"{playerTimer.RankHUDString}" +
+                                        ? $"<font class='fontSize-s' color='gray'>{playerTimer.CachedPB} " + $"{playerTimer.CachedMapPlacement} |</font>" + $" {playerTimer.RankHUDIcon}<font class='fontSize-s' color='gray'>" +
                                           $"{(currentMapTier != null ? $" | Tier: {currentMapTier}" : "")}" +
                                           $"{(currentMapType != null ? $" | {currentMapType}" : "")}" +
-                                          $"{((currentMapType == null && currentMapTier == null) ? $" {currentMapName} " : "")} </font> "
+                                          $"{((currentMapType == null && currentMapTier == null) ? $" {currentMapName} " : "")}  "
                                         : $" <font class='fontSize-s' color='gray'>{playerTimers[player.Slot].ReplayHUDString}</font>";
 
                     string keysLineNoHtml = $"{((playerButtons & PlayerButtons.Moveleft) != 0 ? "A" : "_")} " +
@@ -242,11 +242,17 @@ namespace SharpTimer
 
                     if (forcePlayerSpeedEnabled == true) ForcePlayerSpeed(player, player.Pawn.Value.WeaponServices.ActiveWeapon.Value.DesignerName);
 
-                    if (playerTimer.RankHUDString == null && playerTimer.IsRankPbCached == false)
+                    if (playerTimer.IsRankPbCached == false)
                     {
                         SharpTimerDebug($"{player.PlayerName} has rank and pb null... calling handler");
                         _ = RankCommandHandler(player, player.SteamID.ToString(), player.Slot, player.PlayerName, true);
                         playerTimer.IsRankPbCached = true;
+                    }
+
+                    if (player.Clan != playerTimer.CachedRank)
+                    {
+                        player.Clan = $"[{playerTimer.CachedRank}]";
+                        Utilities.SetStateChanged(player, "CCSPlayerController", "m_szClan");
                     }
 
                     if (playerTimer.IsSpecTargetCached == false || specTargets.ContainsKey(player.Pawn.Value.EntityHandle.Index) == false)
@@ -345,7 +351,7 @@ namespace SharpTimer
                     //string veloLine = $" {(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")}<font class='fontSize-s' color='{tertiaryHUDcolor}'>Speed:</font> <font class='' color='{secondaryHUDcolor}'>{formattedPlayerVel}</font> <font class='fontSize-s' color='gray'>({formattedPlayerPre})</font>{(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")} <br>";
                     string veloLine = $" {(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")}<font class='fontSize-s' color='{tertiaryHUDcolor}'>Speed:</font> <font class='' color='{secondaryHUDcolor}'>{formattedPlayerVel}</font> <font class='fontSize-s' color='gray'>({formattedPlayerPre})</font>{(playerTimer.IsTester ? playerTimer.TesterSparkleGif : "")} <br>";
                     string infoLine = !playerTimer.IsReplaying
-                                        ? $"{playerTimer.RankHUDString}" +
+                                        ? $"<font class='fontSize-s' color='gray'>{playerTimer.CachedPB} " + $"{playerTimer.CachedMapPlacement} |</font>" + $" {playerTimer.RankHUDIcon}<font class='fontSize-s' color='gray'>" +
                                           $"{(currentMapTier != null ? $" | Tier: {currentMapTier}" : "")}" +
                                           $"{(currentMapType != null ? $" | {currentMapType}" : "")}" +
                                           $"{((currentMapType == null && currentMapTier == null) ? $" {currentMapName} " : "")} </font> <br>"
@@ -402,14 +408,14 @@ namespace SharpTimer
             SharpTimerDebug($"Printing Commands for {player.PlayerName}");
             player.PrintToChat($"{msgPrefix}Available Commands:");
 
-            if (respawnEnabled)                             player.PrintToChat($"{msgPrefix}!r (css_r) - Respawns you");
-            if (respawnEnabled && bonusRespawnPoses.Any())  player.PrintToChat($"{msgPrefix}!rb <#> / !b <#> (css_rb / css_b) - Respawns you to a bonus");
-            if (topEnabled)                                 player.PrintToChat($"{msgPrefix}!top (css_top) - Lists top 10 records on this map");
-            if (topEnabled && bonusRespawnPoses.Any())      player.PrintToChat($"{msgPrefix}!topbonus <#> (css_topbonus) - Lists top 10 records of a bonus");
-            if (rankEnabled)                                player.PrintToChat($"{msgPrefix}!rank (css_rank) - Shows your current rank and pb");
-            if (globalRankeEnabled)                         player.PrintToChat($"{msgPrefix}!points (css_points) - Prints top 10 points");
-            if (goToEnabled)                                player.PrintToChat($"{msgPrefix}!goto <name> (css_goto) - Teleports you to a player");
-            if (stageTriggerPoses.Any())                    player.PrintToChat($"{msgPrefix}!stage <#> (css_goto) - Teleports you to a stage");
+            if (respawnEnabled) player.PrintToChat($"{msgPrefix}!r (css_r) - Respawns you");
+            if (respawnEnabled && bonusRespawnPoses.Any()) player.PrintToChat($"{msgPrefix}!rb <#> / !b <#> (css_rb / css_b) - Respawns you to a bonus");
+            if (topEnabled) player.PrintToChat($"{msgPrefix}!top (css_top) - Lists top 10 records on this map");
+            if (topEnabled && bonusRespawnPoses.Any()) player.PrintToChat($"{msgPrefix}!topbonus <#> (css_topbonus) - Lists top 10 records of a bonus");
+            if (rankEnabled) player.PrintToChat($"{msgPrefix}!rank (css_rank) - Shows your current rank and pb");
+            if (globalRankeEnabled) player.PrintToChat($"{msgPrefix}!points (css_points) - Prints top 10 points");
+            if (goToEnabled) player.PrintToChat($"{msgPrefix}!goto <name> (css_goto) - Teleports you to a player");
+            if (stageTriggerPoses.Any()) player.PrintToChat($"{msgPrefix}!stage <#> (css_goto) - Teleports you to a stage");
 
             if (cpEnabled)
             {
@@ -755,162 +761,230 @@ namespace SharpTimer
             }
         }
 
-        public async Task<string> GetPlayerPlacementWithTotal(CCSPlayerController? player, string steamId, string playerName, bool getRankImg = false)
+        public async Task<string> GetPlayerMapPlacementWithTotal(CCSPlayerController? player, string steamId, string playerName, bool getRankImg = false, bool getPlacementOnly = false)
         {
-            if (!IsAllowedPlayer(player))
+            if (IsAllowedPlayer(player) || IsAllowedSpectator(player))
             {
-                return "";
-            }
-
-            int savedPlayerTime;
-            if (useMySQL == true)
-            {
-                savedPlayerTime = await GetPreviousPlayerRecordFromDatabase(player, steamId, currentMapName, playerName);
-            }
-            else
-            {
-                savedPlayerTime = GetPreviousPlayerRecord(player);
-            }
-
-            if (savedPlayerTime == 0 && getRankImg == false)
-            {
-                return "Unranked";
-            }
-            else if (savedPlayerTime == 0)
-            {
-                return "<img src='https://files.catbox.moe/h3zqzd.png' class=''>";
-            }
-
-            Dictionary<string, PlayerRecord> sortedRecords;
-            if (useMySQL == true)
-            {
-                sortedRecords = await GetSortedRecordsFromDatabase();
-            }
-            else
-            {
-                sortedRecords = GetSortedRecords();
-            }
-
-            int placement = 1;
-
-            foreach (var kvp in sortedRecords)
-            {
-                int recordTimerTicks = kvp.Value.TimerTicks; // Get the timer ticks from the dictionary value
-
-                if (savedPlayerTime > recordTimerTicks)
+                int savedPlayerTime;
+                if (useMySQL == true)
                 {
-                    placement++;
+                    savedPlayerTime = await GetPreviousPlayerRecordFromDatabase(player, steamId, currentMapName, playerName);
                 }
                 else
                 {
-                    break;
+                    savedPlayerTime = GetPreviousPlayerRecord(player);
                 }
+
+                if (savedPlayerTime == 0 && getRankImg == false)
+                {
+                    return "Unranked";
+                }
+                else if (savedPlayerTime == 0)
+                {
+                    return "<img src='https://files.catbox.moe/h3zqzd.png' class=''>";
+                }
+
+                Dictionary<string, PlayerRecord> sortedRecords;
+                if (useMySQL == true)
+                {
+                    sortedRecords = await GetSortedRecordsFromDatabase();
+                }
+                else
+                {
+                    sortedRecords = GetSortedRecords();
+                }
+
+                int placement = 1;
+
+                foreach (var kvp in sortedRecords)
+                {
+                    int recordTimerTicks = kvp.Value.TimerTicks; // Get the timer ticks from the dictionary value
+
+                    if (savedPlayerTime > recordTimerTicks)
+                    {
+                        placement++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                int totalPlayers = sortedRecords.Count;
+
+                double percentage = (double)placement / totalPlayers * 100;
+
+                return CalculateRankStuff(totalPlayers, placement, percentage, getRankImg, getPlacementOnly);
             }
+            else
+            {
+                return "";
+            }
+        }
 
-            int totalPlayers = sortedRecords.Count;
+        public async Task<string> GetPlayerServerPlacement(CCSPlayerController? player, string steamId, string playerName, bool getRankImg = false, bool getPlacementOnly = false)
+        {
+            if (IsAllowedPlayer(player) || IsAllowedSpectator(player))
+            {
+                int savedPlayerTime;
+                if (useMySQL == true)
+                {
+                    savedPlayerTime = await GetPlayerPointsFromDatabase(player, steamId, playerName);
+                }
+                else
+                {
+                    savedPlayerTime = 0;
+                }
 
-            string rank;
-            double percentage = (double)placement / totalPlayers * 100;
+                if (savedPlayerTime == 0 && getRankImg == false)
+                {
+                    return "Unranked";
+                }
+                else if (savedPlayerTime == 0)
+                {
+                    return "<img src='https://files.catbox.moe/h3zqzd.png' class=''>";
+                }
 
+                Dictionary<string, PlayerPoints> sortedRecords;
+                if (useMySQL == true)
+                {
+                    sortedRecords = await GetSortedPointsFromDatabase();
+                }
+                else
+                {
+                    //sortedRecords = GetSortedRecords();
+                    sortedRecords = new Dictionary<string, PlayerPoints>();
+                }
+
+                int placement = 1;
+
+                foreach (var kvp in sortedRecords)
+                {
+                    int recordTimerTicks = kvp.Value.GlobalPoints;
+
+                    if (savedPlayerTime > recordTimerTicks)
+                    {
+                        placement++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                int totalPlayers = sortedRecords.Count;
+
+                double percentage = (double)placement / totalPlayers * 100;
+
+                return CalculateRankStuff(totalPlayers, placement, percentage, getRankImg, getPlacementOnly);
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public string CalculateRankStuff(int totalPlayers, int placement, double percentage, bool getRankImg = false, bool getPlacementOnly = false)
+        {
             if (getRankImg)
             {
                 if (totalPlayers < 100)
                 {
                     if (placement <= 1)
-                        rank = god3Icon; // God 3
+                        return god3Icon; // God 3
                     else if (placement <= 2)
-                        rank = god2Icon; // God 2
+                        return god2Icon; // God 2
                     else if (placement <= 3)
-                        rank = god1Icon; // God 1
+                        return god1Icon; // God 1
                     else if (placement <= 10)
-                        rank = royalty3Icon; // Royal 3
+                        return royalty3Icon; // Royal 3
                     else if (placement <= 15)
-                        rank = royalty2Icon; // Royal 2
+                        return royalty2Icon; // Royal 2
                     else if (placement <= 20)
-                        rank = royalty1Icon; // Royal 1
+                        return royalty1Icon; // Royal 1
                     else if (placement <= 25)
-                        rank = legend3Icon; // Legend 3
+                        return legend3Icon; // Legend 3
                     else if (placement <= 30)
-                        rank = legend2Icon; // Legend 2
+                        return legend2Icon; // Legend 2
                     else if (placement <= 35)
-                        rank = legend1Icon; // Legend 1
+                        return legend1Icon; // Legend 1
                     else if (placement <= 40)
-                        rank = master3Icon; // Master 3
+                        return master3Icon; // Master 3
                     else if (placement <= 45)
-                        rank = master2Icon; // Master 2
+                        return master2Icon; // Master 2
                     else if (placement <= 50)
-                        rank = master1Icon; // Master 1
+                        return master1Icon; // Master 1
                     else if (placement <= 55)
-                        rank = diamond3Icon; // Diamond 3
+                        return diamond3Icon; // Diamond 3
                     else if (placement <= 60)
-                        rank = diamond2Icon; // Diamond 2
+                        return diamond2Icon; // Diamond 2
                     else if (placement <= 65)
-                        rank = diamond1Icon; // Diamond 1
+                        return diamond1Icon; // Diamond 1
                     else if (placement <= 70)
-                        rank = platinum3Icon; // Platinum 3
+                        return platinum3Icon; // Platinum 3
                     else if (placement <= 75)
-                        rank = platinum2Icon; // Platinum 2
+                        return platinum2Icon; // Platinum 2
                     else if (placement <= 80)
-                        rank = platinum1Icon; // Platinum 1
+                        return platinum1Icon; // Platinum 1
                     else if (placement <= 85)
-                        rank = gold3Icon; // Gold 3
+                        return gold3Icon; // Gold 3
                     else if (placement <= 90)
-                        rank = gold2Icon; // Gold 2
+                        return gold2Icon; // Gold 2
                     else if (placement <= 95)
-                        rank = gold1Icon; // Gold 1
+                        return gold1Icon; // Gold 1
                     else
-                        rank = silver1Icon; // Silver 1
+                        return silver1Icon; // Silver 1
                 }
                 else
                 {
                     if (placement <= 1)
-                        rank = god3Icon; // God 3
+                        return god3Icon; // God 3
                     else if (placement <= 2)
-                        rank = god2Icon; // God 2
+                        return god2Icon; // God 2
                     else if (placement <= 3)
-                        rank = god1Icon; // God 1
+                        return god1Icon; // God 1
                     else if (percentage <= 1)
-                        rank = royalty3Icon; // Royal 3
+                        return royalty3Icon; // Royal 3
                     else if (percentage <= 5.0)
-                        rank = royalty2Icon; // Royalty 2
+                        return royalty2Icon; // Royalty 2
                     else if (percentage <= 10.0)
-                        rank = royalty1Icon; // Royalty 1
+                        return royalty1Icon; // Royalty 1
                     else if (percentage <= 15.0)
-                        rank = legend3Icon; // Legend 3
+                        return legend3Icon; // Legend 3
                     else if (percentage <= 20.0)
-                        rank = legend2Icon; // Legend 2
+                        return legend2Icon; // Legend 2
                     else if (percentage <= 25.0)
-                        rank = legend1Icon; // Legend 1
+                        return legend1Icon; // Legend 1
                     else if (percentage <= 30.0)
-                        rank = master3Icon; // Master 3
+                        return master3Icon; // Master 3
                     else if (percentage <= 35.0)
-                        rank = master2Icon; // Master 2
+                        return master2Icon; // Master 2
                     else if (percentage <= 40.0)
-                        rank = master1Icon; // Master 1
+                        return master1Icon; // Master 1
                     else if (percentage <= 45.0)
-                        rank = diamond3Icon; // Diamond 3
+                        return diamond3Icon; // Diamond 3
                     else if (percentage <= 50.0)
-                        rank = diamond2Icon; // Diamond 2
+                        return diamond2Icon; // Diamond 2
                     else if (percentage <= 55.0)
-                        rank = diamond1Icon; // Diamond 1
+                        return diamond1Icon; // Diamond 1
                     else if (percentage <= 60.0)
-                        rank = platinum3Icon; // Platinum 3
+                        return platinum3Icon; // Platinum 3
                     else if (percentage <= 65.0)
-                        rank = platinum2Icon; // Platinum 2
+                        return platinum2Icon; // Platinum 2
                     else if (percentage <= 70.0)
-                        rank = platinum1Icon; // Platinum 1
+                        return platinum1Icon; // Platinum 1
                     else if (percentage <= 75.0)
-                        rank = gold3Icon; // Gold 3
+                        return gold3Icon; // Gold 3
                     else if (percentage <= 80.0)
-                        rank = gold2Icon; // Gold 2
+                        return gold2Icon; // Gold 2
                     else if (percentage <= 85.0)
-                        rank = gold1Icon; // Gold 1
+                        return gold1Icon; // Gold 1
                     else if (percentage <= 90.0)
-                        rank = silver3Icon; // Silver 3
+                        return silver3Icon; // Silver 3
                     else if (percentage <= 95.0)
-                        rank = silver2Icon; // Silver 2
+                        return silver2Icon; // Silver 2
                     else
-                        rank = silver1Icon; // Silver 1
+                        return silver1Icon; // Silver 1
                 }
             }
             else
@@ -918,105 +992,102 @@ namespace SharpTimer
                 if (totalPlayers < 100)
                 {
                     if (placement <= 1)
-                        rank = $"God III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"God III";
                     else if (placement <= 2)
-                        rank = $"God II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"God II";
                     else if (placement <= 3)
-                        rank = $"God I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"God I";
                     else if (placement <= 10)
-                        rank = $"Royalty III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Royalty III";
                     else if (placement <= 15)
-                        rank = $"Royalty II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Royalty II";
                     else if (placement <= 20)
-                        rank = $"Royalty I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Royalty I";
                     else if (placement <= 25)
-                        rank = $"Legend III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Legend III";
                     else if (placement <= 30)
-                        rank = $"Legend II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Legend II";
                     else if (placement <= 35)
-                        rank = $"Legend I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Legend I";
                     else if (placement <= 40)
-                        rank = $"Master III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Master III";
                     else if (placement <= 45)
-                        rank = $"Master II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Master II";
                     else if (placement <= 50)
-                        rank = $"Master I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Master I";
                     else if (placement <= 55)
-                        rank = $"Diamond III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Diamond III";
                     else if (placement <= 60)
-                        rank = $"Diamond II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Diamond II";
                     else if (placement <= 65)
-                        rank = $"Diamond I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Diamond I";
                     else if (placement <= 70)
-                        rank = $"Platinum III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Platinum III";
                     else if (placement <= 75)
-                        rank = $"Platinum II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Platinum II";
                     else if (placement <= 80)
-                        rank = $"Platinum I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Platinum I";
                     else if (placement <= 85)
-                        rank = $"Gold III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Gold III";
                     else if (placement <= 90)
-                        rank = $"Gold II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Gold II";
                     else if (placement <= 95)
-                        rank = $"Gold I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Gold I";
                     else
-                        rank = $"Silver I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Silver I";
                 }
                 else
                 {
                     if (placement <= 1)
-                        rank = $"God III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"God III";
                     else if (placement <= 2)
-                        rank = $"God II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"God II";
                     else if (placement <= 3)
-                        rank = $"God I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"God I";
                     else if (percentage <= 1)
-                        rank = $"Royalty III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Royalty III";
                     else if (percentage <= 5.0)
-                        rank = $"Royalty II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Royalty II";
                     else if (percentage <= 10.0)
-                        rank = $"Royalty I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Royalty I";
                     else if (percentage <= 15.0)
-                        rank = $"Legend III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Legend III";
                     else if (percentage <= 20.0)
-                        rank = $"Legend II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Legend II";
                     else if (percentage <= 25.0)
-                        rank = $"Legend I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Legend I";
                     else if (percentage <= 30.0)
-                        rank = $"Master III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Master III";
                     else if (percentage <= 35.0)
-                        rank = $"Master II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Master II";
                     else if (percentage <= 40.0)
-                        rank = $"Master I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Master I";
                     else if (percentage <= 45.0)
-                        rank = $"Diamond III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Diamond III";
                     else if (percentage <= 50.0)
-                        rank = $"Diamond II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Diamond II";
                     else if (percentage <= 55.0)
-                        rank = $"Diamond I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Diamond I";
                     else if (percentage <= 60.0)
-                        rank = $"Platinum III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Platinum III";
                     else if (percentage <= 65.0)
-                        rank = $"Platinum II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Platinum II";
                     else if (percentage <= 70.0)
-                        rank = $"Platinum I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Platinum I";
                     else if (percentage <= 75.0)
-                        rank = $"Gold III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Gold III";
                     else if (percentage <= 80.0)
-                        rank = $"Gold II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Gold II";
                     else if (percentage <= 85.0)
-                        rank = $"Gold I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Gold I";
                     else if (percentage <= 90.0)
-                        rank = $"Silver III ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Silver III";
                     else if (percentage <= 95.0)
-                        rank = $"Silver II ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Silver II";
                     else
-                        rank = $"Silver I ({placement}/{totalPlayers})";
+                        return getPlacementOnly ? $"({placement}/{totalPlayers})" : $"Silver I";
                 }
             }
-
-
-            return rank;
         }
 
         public void OnTimerStart(CCSPlayerController? player, int bonusX = 0)
@@ -1184,7 +1255,7 @@ namespace SharpTimer
 
         public async Task PrintMapTimeToChat(CCSPlayerController player, int oldticks, int newticks, int bonusX = 0)
         {
-            string ranking = await GetPlayerPlacementWithTotal(player, player.SteamID.ToString(), player.PlayerName);
+            string ranking = await GetPlayerMapPlacementWithTotal(player, player.SteamID.ToString(), player.PlayerName);
 
             string timeDifference = "";
             if (oldticks != 0) timeDifference = $"[{FormatTimeDifference(newticks, oldticks)}{ChatColors.White}] ";

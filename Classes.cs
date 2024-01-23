@@ -84,11 +84,13 @@ namespace SharpTimer
 
         //hud
         public string? ReplayHUDString { get; set; }
-        public string? RankHUDString { get; set; }
+        public string? RankHUDIcon { get; set; }
+        public string? CachedRank { get; set; }
         public bool IsRankPbCached { get; set; }
         public bool IsSpecTargetCached { get; set; }
         public string? PreSpeed { get; set; }
-        public string? PB { get; set; }
+        public string? CachedPB { get; set; }
+        public string? CachedMapPlacement { get; set; }
         
         //logic
         public int? TicksInAir { get; set; }
@@ -161,6 +163,14 @@ namespace SharpTimer
     {
         public string? PlayerName { get; set; }
         public int TimerTicks { get; set; }
+    }
+
+    // PlayerPoints for MySql
+    public class PlayerPoints
+    {
+        public string? SteamId { get; set; }
+        public string? PlayerName { get; set; }
+        public int GlobalPoints { get; set; }
     }
 
     // KZ checkpoints

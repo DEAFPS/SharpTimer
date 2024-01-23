@@ -332,7 +332,7 @@ namespace SharpTimer
                     }
                 }
 
-                if (useMySQL == true) _ = RankCommandHandler(player, steamId, playerSlot, playerName, true);           
+                if (useMySQL == true) _ = RankCommandHandler(player, steamId, playerSlot, playerName, true);
             }
             catch (Exception ex)
             {
@@ -836,6 +836,49 @@ namespace SharpTimer
             return 0;
         }
 
+        public async Task<int> GetPlayerPointsFromDatabase(CCSPlayerController? player, string steamId, string playerName)
+        {
+            int playerPoints = 0;
+
+            if (!IsAllowedPlayer(player))
+            {
+                return playerPoints;
+            }
+
+            SharpTimerDebug("Trying GetPlayerPointsFromDatabase");
+
+            try
+            {
+                using (var connection = await OpenDatabaseConnectionAsync())
+                {
+                    await CreatePlayerStatsTableAsync(connection);
+
+                    // Retrieve the TimerTicks value for the specified player on the current map
+                    string selectQuery = "SELECT GlobalPoints FROM PlayerStats WHERE SteamID = @SteamID";
+                    using (var selectCommand = new MySqlCommand(selectQuery, connection))
+                    {
+                        selectCommand.Parameters.AddWithValue("@SteamID", steamId);
+
+                        var result = await selectCommand.ExecuteScalarAsync();
+
+                        // Check for DBNull
+                        if (result != null && result != DBNull.Value)
+                        {
+                            SharpTimerDebug($"Got Player Points from MySQL for {playerName}");
+                            playerPoints = Convert.ToInt32(result);
+                            return playerPoints;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SharpTimerError($"Error getting player points from MySQL: {ex.Message}");
+            }
+            return playerPoints;
+        }
+
+
         public async Task<Dictionary<string, PlayerRecord>> GetSortedRecordsFromDatabase(int bonusX = 0)
         {
             string currentMapNamee = bonusX == 0 ? currentMapName : $"{currentMapName}_bonus{bonusX}";
@@ -881,6 +924,37 @@ namespace SharpTimer
                 }
             }
             return new Dictionary<string, PlayerRecord>();
+        }
+
+        public async Task<Dictionary<string, PlayerPoints>> GetSortedPointsFromDatabase()
+        {
+            SharpTimerDebug("Trying GetSortedPoints from MySQL");
+            Dictionary<string, PlayerPoints> PlayerPointsList = new Dictionary<string, PlayerPoints>();
+
+            using (var connection = await OpenDatabaseConnectionAsync())
+            {
+                string query = "SELECT SteamID, PlayerName, GlobalPoints FROM PlayerStats ORDER BY GlobalPoints DESC";
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            PlayerPoints playerStats = new PlayerPoints
+                            {
+                                SteamId = reader["SteamID"].ToString(),
+                                PlayerName = reader["PlayerName"].ToString(),
+                                GlobalPoints = Convert.ToInt32(reader["GlobalPoints"])
+                            };
+
+                            PlayerPointsList.Add(playerStats.SteamId, playerStats);
+                        }
+                    }
+                }
+            }
+
+            return PlayerPointsList;
         }
 
         [ConsoleCommand("css_importpoints", " ")]
