@@ -9,7 +9,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 
 namespace SharpTimer
 {
-    public class SharpTimer
+    public partial class SharpTimer
     {
         [ConsoleCommand("css_dp_timers", "Replay your last pb")]
         [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
@@ -50,7 +50,7 @@ namespace SharpTimer
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]
         public void ReplaySelfCommand(CCSPlayerController? player, CommandInfo command)
         {
-            if (!IsAllowedPlayer(player) || enableReplays == false) return;
+            if (!IsAllowedPlayer(player) || !enableReplays) return;
 
             if (!playerTimers[player.Slot].IsTimerBlocked)
             {

@@ -5,7 +5,7 @@ using CounterStrikeSharp.API.Modules.Commands;
 
 namespace SharpTimer
 {
-    public class Commands
+    public partial class SharpTimer
     {
         [ConsoleCommand("css_help", "alias for !sthelp")]
         [CommandHelper(whoCanExecute: CommandUsage.CLIENT_ONLY)]

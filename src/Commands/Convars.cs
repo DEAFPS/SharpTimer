@@ -3,8 +3,7 @@ using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Utils;
 
-
-namespace SharpTimer
+namespace SharpTimer.Commands.Convars
 {
     public partial class SharpTimer
     {

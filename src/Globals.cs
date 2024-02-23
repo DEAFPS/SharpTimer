@@ -135,34 +135,7 @@ namespace SharpTimer
         public string? remoteBhopDataSource = "https://raw.githubusercontent.com/DEAFPS/SharpTimer/main/remote_data/bhop_.json";
         public string? remoteKZDataSource = "https://raw.githubusercontent.com/DEAFPS/SharpTimer/main/remote_data/kz_.json";
         public string? remoteSurfDataSource = "https://raw.githubusercontent.com/DEAFPS/SharpTimer/main/remote_data/surf_.json";
-        public string? testerPersonalGifsSource = "https://raw.githubusercontent.com/DEAFPS/SharpTimer/main/remote_data/tester_bling.json";
-
-        public static string god3Icon = "<img src='https://i.imgur.com/SEnzkzv.gif' class=''>";
-        public static string god2Icon = "<img src='https://i.imgur.com/SEnzkzv.gif' class=''>";
-        public static string god1Icon = "<img src='https://i.imgur.com/SEnzkzv.gif' class=''>";
-        public static string royalty3Icon = "<img src='https://i.imgur.com/JlOXD4R.png' class=''>";
-        public static string royalty2Icon = "<img src='https://i.imgur.com/KvRyMSa.png' class=''>";
-        public static string royalty1Icon = "<img src='https://i.imgur.com/uMXGmlf.png' class=''>";
-        public static string legend3Icon = "<img src='https://i.imgur.com/HRArP8P.png' class=''>";
-        public static string legend2Icon = "<img src='https://i.imgur.com/Q9VqY5U.png' class=''>";
-        public static string legend1Icon = "<img src='https://i.imgur.com/v5hCxhS.png' class=''>";
-        public static string master3Icon = "<img src='https://i.imgur.com/tld9l3l.png' class=''>";
-        public static string master2Icon = "<img src='https://i.imgur.com/8QKSYcu.png' class=''>";
-        public static string master1Icon = "<img src='https://i.imgur.com/qpkfFNr.png' class=''>";
-        public static string diamond3Icon = "<img src='https://i.imgur.com/Nq5K2MM.png' class=''>";
-        public static string diamond2Icon = "<img src='https://i.imgur.com/u2rYsVi.png' class=''>";
-        public static string diamond1Icon = "<img src='https://i.imgur.com/VYn6sRF.png' class=''>";
-        public static string platinum3Icon = "<img src='https://i.imgur.com/izGtCGl.png' class=''>";
-        public static string platinum2Icon = "<img src='https://i.imgur.com/iwj1YfK.png' class=''>";
-        public static string platinum1Icon = "<img src='https://i.imgur.com/5ny9N9j.png' class=''>";
-        public static string gold3Icon = "<img src='https://i.imgur.com/XM2ReIY.png' class=''>";
-        public static string gold2Icon = "<img src='https://i.imgur.com/MCdGy7k.png' class=''>";
-        public static string gold1Icon = "<img src='https://i.imgur.com/eo04Y0x.png' class=''>";
-        public static string silver3Icon = "<img src='https://i.imgur.com/DE6Ptj9.png' class=''>";
-        public static string silver2Icon = "<img src='https://i.imgur.com/OciFq7d.png' class=''>";
-        public static string silver1Icon = "<img src='https://i.imgur.com/lKJIPSL.png' class=''>";
-        public static string unrankedIcon = "<img src='https://i.imgur.com/2OIdZ5s.png' class=''>";
-
+        //public string? testerPersonalGifsSource = "https://raw.githubusercontent.com/DEAFPS/SharpTimer/main/remote_data/tester_bling.json";
 
         public struct WeaponSpeedStats
         {

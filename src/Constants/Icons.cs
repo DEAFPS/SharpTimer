@@ -1,4 +1,4 @@
-﻿namespace SharpTimer
+﻿namespace SharpTimer.Constants
 {
     public static class Icons
     {

@@ -10,7 +10,7 @@ using System.Data;
 
 namespace SharpTimer
 {
-    public class SharpTimer
+    public partial class SharpTimer
     {
         private async Task<MySqlConnection> OpenDatabaseConnectionAsync()
         {

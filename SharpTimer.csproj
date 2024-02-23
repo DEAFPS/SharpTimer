@@ -33,6 +33,10 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="src\Configurations\" />
+  </ItemGroup>
+
   <Target Name="CopyPackageReferences" AfterTargets="Build">
     <Copy SourceFiles="@(PackageReference->'%(ResolvedPath)')" DestinationFolder="$(CustomOutputPath)" SkipUnchangedFiles="true" />
   </Target>
