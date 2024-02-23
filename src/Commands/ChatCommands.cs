@@ -9,7 +9,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 
 namespace SharpTimer
 {
-    public partial class SharpTimer
+    public class SharpTimer
     {
         [ConsoleCommand("css_dp_timers", "Replay your last pb")]
         [CommandHelper(whoCanExecute: CommandUsage.SERVER_ONLY)]
@@ -798,7 +798,7 @@ namespace SharpTimer
 
                 playerTimers[player.Slot].TicksSinceLastCmd = 0;
 
-                if (playerTimers[player.Slot].IsTimerBlocked == false)
+                if (!playerTimers[player.Slot].IsTimerBlocked)
                 {
                     SharpTimerDebug($"css_stage failed. Player {player.PlayerName} had timer running.");
                     player.PrintToChat(msgPrefix + $" Please stop your timer first using: {primaryChatColor}!timer");
@@ -812,7 +812,7 @@ namespace SharpTimer
                     return;
                 }
 
-                if (useStageTriggers == false)
+                if (!useStageTriggers)
                 {
                     SharpTimerDebug("css_stage failed useStages is false.");
                     player.PrintToChat(msgPrefix + $" Stages unavalible");

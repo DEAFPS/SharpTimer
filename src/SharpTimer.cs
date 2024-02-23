@@ -16,7 +16,7 @@ namespace SharpTimer
         {
             SharpTimerDebug("Loading Plugin...");
 
-            defaultServerHostname = ConVar.Find("hostname").StringValue;
+            defaultServerHostname = ConVar.Find("hostname")?.StringValue ?? throw new InvalidOperationException($"The 'hostname' ConVar is not set.");
             Server.ExecuteCommand($"execifexists SharpTimer/config.cfg");
 
             gameDir = Server.GameDirectory;
